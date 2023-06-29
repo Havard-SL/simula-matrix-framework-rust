@@ -141,49 +141,55 @@ fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     work
 }
 
-// Old functions above, new functions below.
+// Old functions above, new functions below. ###################################################################3
 
+// TODO: Write cleaner with "?" operator.
 fn group_add_new(table: &[Vec<usize>], a: &usize, b: &usize) -> Option<usize> {
     if b > a {
         if let Some(row) = table.get(*a) {
-            if let Some(column) = row.get(b - a) {
-                return Some(*column)
-            } else {
-                return None
-            }
+            // if let Some(column) = row.get(b - a) {
+            //     Some(*column)
+            // } else {
+            //     None
+            // }
+            row.get(b - a).copied()
         } else {
-            return None
+            None
         }
     } else if let Some(row) = table.get(*b) {
-            if let Some(column) = row.get(a - b) {
-                return Some(*column)
-            } else {
-                return None
-            }
+            // if let Some(column) = row.get(a - b) {
+            //     Some(*column)
+            // } else {
+            //     None
+            // }
+            row.get(a - b).copied()
     } else {
-        return None
+        None
     }
 }
 
+// TODO: Write cleaner with "?" operator.
 fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
     let [a, b, c] = triplet;
 
     let l = if let Some(l) = group_add_new(table, a, b) {
-        if let Some(l) = group_add_new(table, &l, c) {
-            l
-        } else {
-            return None
-        }
+        // if let Some(l) = group_add_new(table, &l, c) {
+        //     l
+        // } else {
+        //     return None
+        // }
+        group_add_new(table, &l, c)?
     } else {
         return None
     };
 
     let r = if let Some(r) = group_add_new(table, b, c) {
-        if let Some(r) = group_add_new(table, a, &r) {
-            r
-        } else {
-            return None
-        }
+        // if let Some(r) = group_add_new(table, a, &r) {
+        //     r
+        // } else {
+        //     return None
+        // }
+        group_add_new(table, a, &r)?
     } else {
         return None
     };
@@ -194,12 +200,68 @@ fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
     Some(true)
 }
 
-// TODO: Liftimes?
-fn test_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> (bool, Vec<[usize; 3]>) {
-    todo!()
+// TODO: Lifetimes?
+// TODO: Match or if let?
+// Takes a table, and tests associativity.
+// Returns None if it is not associative. Returns Some(v) with v being a new set of untested associativity checks.
+fn test_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> Option<Vec<[usize; 3]>> {
+    
+    let mut new_associativity_checks: Vec<[usize; 3]>;
+    let mut kept_checks_indices: Vec<usize> = vec![];
+
+    for (i, triplet) in remaining_associatvity_checks.into_iter().enumerate() {
+        match test_triplet(table, triplet) {
+            None => new_associativity_checks.push(*triplet),
+            Some(b) if !b => return None,
+            Some(_) => continue,
+        }
+        // if let Some(b) = test_triplet(table, triplet) {
+        //     if !b {
+        //         return (false, vec![]);
+        //     }
+        // } else {
+        //     new_associativity_checks.push(*triplet);
+        // }
+    }
+
+    Some(new_associativity_checks)
 }
 
-fn group_generation_recursion_new(table: &Vec<Vec<usize>>, n: usize, remaining_associatvity_checks: &[[usize; 3]]) -> Vec<Vec<Vec<usize>>> {
+// A more advanced
+fn test_associativity_advanced(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> Option<Vec<[usize; 3]>> {
+    
+    let mut new_associativity_checks: &[[usize; 3]];
+    let mut remove_checks_indices: Vec<usize> = vec![];
+
+    for (i, triplet) in remaining_associatvity_checks.into_iter().enumerate() {
+        match test_triplet(table, triplet) {
+            None => continue,
+            Some(b) if !b => return None,
+            Some(_) => remove_checks_indices.push(i),
+        }
+        // if let Some(b) = test_triplet(table, triplet) {
+        //     if !b {
+        //         return (false, vec![]);
+        //     }
+        // } else {
+        //     new_associativity_checks.push(*triplet);
+        // }
+    }
+
+    let remaining = remaining_associatvity_checks.split(|triplet| match test_triplet(table, triplet) {
+        None => false,
+        Some(b) if !b => return None,
+        Some(_) => true,
+    } ).collect();
+
+    for i in kept_checks_indices.iter().rev() {
+        let (a, b) = remaining_associatvity_checks.split(pred)
+    }
+
+    Some(new_associativity_checks)
+}
+
+fn group_generation_recursion_new(table: &[Vec<usize>], n: usize, remaining_associatvity_checks: &[[usize; 3]]) -> Vec<Vec<Vec<usize>>> {
     todo!()
 }
 
