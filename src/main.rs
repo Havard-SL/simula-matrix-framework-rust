@@ -130,6 +130,111 @@ fn generate_all_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     work
 }
 
+fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
+    let mut work: Vec<Vec<Vec<usize>>> = vec![];
+
+    let v = (0..n).collect();
+
+    let working_table = vec![v];
+    work.append(&mut group_generation_recursion(&working_table, n));
+
+    work
+}
+
+// Old functions above, new functions below.
+
+fn group_add_new(table: &[Vec<usize>], a: &usize, b: &usize) -> Option<usize> {
+    if b > a {
+        if let Some(row) = table.get(*a) {
+            if let Some(column) = row.get(b - a) {
+                return Some(*column)
+            } else {
+                return None
+            }
+        } else {
+            return None
+        }
+    } else if let Some(row) = table.get(*b) {
+            if let Some(column) = row.get(a - b) {
+                return Some(*column)
+            } else {
+                return None
+            }
+    } else {
+        return None
+    }
+}
+
+fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
+    let [a, b, c] = triplet;
+
+    let l = if let Some(l) = group_add_new(table, a, b) {
+        if let Some(l) = group_add_new(table, &l, c) {
+            l
+        } else {
+            return None
+        }
+    } else {
+        return None
+    };
+
+    let r = if let Some(r) = group_add_new(table, b, c) {
+        if let Some(r) = group_add_new(table, a, &r) {
+            r
+        } else {
+            return None
+        }
+    } else {
+        return None
+    };
+
+    if l != r {
+        return Some(false)
+    }
+    Some(true)
+}
+
+// TODO: Liftimes?
+fn test_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> (bool, Vec<[usize; 3]>) {
+    todo!()
+}
+
+fn group_generation_recursion_new(table: &Vec<Vec<usize>>, n: usize, remaining_associatvity_checks: &[[usize; 3]]) -> Vec<Vec<Vec<usize>>> {
+    todo!()
+}
+
+fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
+    let mut work: Vec<Vec<Vec<usize>>> = vec![];
+
+    let triplets = generate_all_associativity_triplets(n, false);
+
+    for i in 0..n {
+        let working_table = vec![vec![i]];
+        
+        work.append(&mut group_generation_recursion_new(&working_table, n, &triplets));
+    }
+
+    work
+}
+
+fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
+    let mut work: Vec<Vec<Vec<usize>>> = vec![];
+
+    let triplets = generate_all_associativity_triplets(n, true);
+
+    let v = (0..n).collect();
+
+    let working_table = vec![v];
+    work.append(&mut group_generation_recursion_new(&working_table, n, &triplets));
+
+    work
+}
+
+// TODO: Permutation struct
+fn generate_all_permutations(n: usize) -> Vec<usize> {
+    todo!()
+}
+
 fn print_pretty_table(table: &[Vec<usize>]) {
     let n = table.len()*3 + 3;
     let border = "-".repeat(n);
@@ -153,22 +258,6 @@ fn print_pretty_table(table: &[Vec<usize>]) {
         println!("{string}");
     }
     println!("{border}");
-}
-
-fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
-    let mut work: Vec<Vec<Vec<usize>>> = vec![];
-
-    let v = (0..n).collect();
-
-    let working_table = vec![v];
-    work.append(&mut group_generation_recursion(&working_table, n));
-
-    work
-}
-
-// TODO: Permutation struct
-fn generate_all_permutations(n: usize) -> Vec<usize> {
-    todo!()
 }
 
 fn main() {
