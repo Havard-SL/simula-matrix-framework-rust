@@ -1,19 +1,25 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-// Table is stored as the rows of the lower triangular representation of the group operation table.
+use std::time::Instant;
 
-use std::vec;
+// Table is stored as the rows of the upper triangular representation of the group operation table.
+// Becase there was no benefit to storing as rows of lower triangular that could outweigh the benefit
+// of easily reusing the same code for sudocurity tables.
 
 // Generates every triplet that has to be associative.
 // (a, b, c) where a <= b <= c, but a != b != c
-// TODO: Maybe optimize away the if statement somehow.
-fn generate_associativity_triplets(n: usize) -> Vec<[usize; 3]> {
+fn generate_all_associativity_triplets(n: usize, zero_identity: bool) -> Vec<[usize; 3]> {
     let mut work: Vec<[usize; 3]> = vec![];
-    for a in 0..(n-1) {
+    let start = match zero_identity {
+        true => 1,
+        false => 0,
+    };
+
+    for a in start..(n-1) {
         for b in a..n {
             for c in b..n {
-                if !(a == b && a == c) {
+                if a != c {
                     work.push([a, b, c])
                 }
             }
@@ -25,14 +31,17 @@ fn generate_associativity_triplets(n: usize) -> Vec<[usize; 3]> {
 // Takes a and b and gives a + b where + is the group operation from the group operation table.
 fn group_add(table: &[Vec<usize>], a: &usize, b: &usize) -> usize {
     if b > a {
-        table[*b][*a]
+        table[*a][b - a]
     } else {
-        table[*a][*b]
+        table[*b][a - b]
     }
 }
 
 fn is_group_associative(table: &[Vec<usize>]) -> bool {
-    let triplets = generate_associativity_triplets(table.len());
+    let triplets = match table[0][0] {
+       0 => generate_all_associativity_triplets(table.len(), true),
+       _ => generate_all_associativity_triplets(table.len(), false),
+    };
 
     for triplet in &triplets {
         let [a, b, c] = triplet;
@@ -51,57 +60,110 @@ fn is_group_associative(table: &[Vec<usize>]) -> bool {
     true
 }
 
-// Assume table is already a valid table for the given values
-// TODO: Test if table is empty (match statement in the beginning?)
+// Assume table is already a valid and non-empty table for the given values
+// TODO: Check associativity while running, not only at the end.
 fn group_generation_recursion(table: &Vec<Vec<usize>>, n: usize) -> Vec<Vec<Vec<usize>>> {
     
-    // Check if finished table
-    if table.last().unwrap().len() == n {
-        if is_group_associative(table) {
-            return vec![table.clone()]
+    let mut result: Vec<Vec<Vec<usize>>> = vec![];
+
+    if let Some(last_row) = table.last() {
+             
+        if table.len() == n {
+            if is_group_associative(table) {
+                return vec![table.clone()]
+            }
+            return vec![]
         }
-        return vec![]
-    }
 
-    let row: usize;
-    let column: usize;
+        let row: usize;
+        let column: usize;
 
-    // Finding the position of the next value
-    if table[table.len() - 1].len() == table.len() {
-        row = table.len();
-        column = 0;
-    } else {
-        row = table.len() - 1;
-        column = table[table.len() - 1].len();
+        // Finding the position of the next value
+        if last_row.len() == n - table.len() + 1 {
+            row = table.len();
+            column = table.len();
+        } else {
+            row = table.len() - 1;
+            column = last_row.len() + table.len() - 1;
+        }
+
+        // Find every value satisfying sudoku property and try again recursively.
+        if row == table.len() {
+            'val: for i in 0..n {
+                for (j, r) in table.iter().enumerate() {
+                    if r[column - j] == i {
+                        continue 'val;
+                    }
+                }
+                let mut working_table = table.clone();
+                working_table.push(vec![i]);
+                result.append(&mut group_generation_recursion(&working_table, n))
+            }
+        } else {
+            'val: for i in 0..n {
+                if table[row].contains(&i) {
+                    continue 'val;
+                }
+                for (j, r) in table.iter().take(row).enumerate() {
+                    if r[row - j] == i || r[column - j] == i {
+                        continue 'val;
+                    }
+                }
+                let mut working_table = table.clone();
+                working_table.last_mut().unwrap().push(i);
+                result.append(&mut group_generation_recursion(&working_table, n))
+            }
+        }        
     }
     
-    // Find every value satisfying sudoku property and try again recursively.
-    let mut result: Vec<Vec<Vec<usize>>> = vec![];
-    for i in 0..n {
-        if !table[row].contains(&i) && !table[column].contains(&i) {
-            let mut working_table = table.clone();
-
-            if column == 0 {
-                working_table.push(vec![i]);
-            } else {
-                // TODO: Remove unwrap?
-                working_table[table.len() - 1].push(i);
-            }
-            result.append(&mut group_generation_recursion(&working_table, n))
-        }
-    }
-
     result
 }
 
 fn generate_all_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
-    let work: Vec<Vec<Vec<usize>>> = vec![];
+    let mut work: Vec<Vec<Vec<usize>>> = vec![];
 
-    group_generation_recursion(&vec![], n)
+    for i in 0..n {
+        let working_table = vec![vec![i]];
+        work.append(&mut group_generation_recursion(&working_table, n));
+    }
+
+    work
+}
+
+fn print_pretty_table(table: &[Vec<usize>]) {
+    let n = table.len()*3 + 3;
+    let border = "-".repeat(n);
+    println!("{border}");
+    for row in 0..table.len() {
+        let mut string = "|".to_string();
+        for column in 0..table.len() {
+            let val = match (row, column) {
+                (row, column) if row > column => table[column][row - column],
+                (_, _) => table[row][column - row],
+            };
+            if val < 10 {
+                string.push_str("  ");
+                string.push_str(&val.to_string());
+            } else {
+                string.push(' ');
+                string.push_str(&val.to_string());
+            }
+        }
+        string.push_str(" |");
+        println!("{string}");
+    }
+    println!("{border}");
 }
 
 fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
-    todo!()
+    let mut work: Vec<Vec<Vec<usize>>> = vec![];
+
+    let v = (0..n).collect();
+
+    let working_table = vec![v];
+    work.append(&mut group_generation_recursion(&working_table, n));
+
+    work
 }
 
 // TODO: Permutation struct
@@ -111,6 +173,42 @@ fn generate_all_permutations(n: usize) -> Vec<usize> {
 
 fn main() {
     println!("Hello, world!");
-    println!("{:?}", generate_associativity_triplets(4));
-    println!("{:?}", generate_all_groups(3));
+    // println!("{:?}", generate_associativity_triplets(4));
+    let time = Instant::now();
+    let groups = generate_all_sudocurity_groups(8);
+    let time = time.elapsed().as_secs();
+    // for g in &groups {
+    //     print_pretty_table(g);
+    // }
+    println!("{}", groups.len());
+    println!("{}", time);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_generate_all_associativity_triplets() {
+        todo!()
+    }
+
+    fn test_group_add() {
+        todo!()
+    }
+
+    fn test_is_group_associative() {
+        todo!()
+    }
+
+    fn test_group_generation_recursion() {
+        todo!()
+    }
+
+    fn test_generate_all_groups() {
+        todo!()
+    }
+
+    fn test_generate_all_sudocurity_groups() {
+        todo!()
+    }
 }
