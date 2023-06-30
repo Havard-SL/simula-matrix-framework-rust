@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::{time::Instant};
+use std::{time::Instant, vec};
 
 // Table is stored as the rows of the upper triangular representation of the group operation table.
 // Becase there was no benefit to storing as rows of lower triangular that could outweigh the benefit
@@ -343,9 +343,88 @@ fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
     work
 }
 
+fn permutation_recursion(n: usize, part_of_permutation: Vec<usize>) -> Vec<Vec<usize>> {
+    if part_of_permutation.len() == n {
+        return vec![part_of_permutation];
+    }
+    
+    let mut result: Vec<Vec<usize>> = vec![];
+    
+    for i in 0..n {
+        if !part_of_permutation.contains(&i) {
+            let mut new_permutation = part_of_permutation.clone();
+            new_permutation.push(i);
+            result.append(&mut permutation_recursion(n, new_permutation));
+        }
+    }
+    
+    result
+}
+
 // TODO: Permutation struct
-fn generate_all_permutations(n: usize) -> Vec<usize> {
-    todo!()
+fn generate_all_permutations(n: usize) -> Vec<Vec<usize>> {
+    permutation_recursion(n, vec![])
+}
+
+// a < b
+fn swap_rows_and_columns(table: &mut [Vec<usize>], a: usize, b: usize) {
+
+    let mut a = a;
+    let mut b = b;
+
+    if a > b {
+        (a, b) = (b, a);
+    }
+
+    // Part 1
+    for row in table.iter_mut().take(a) {
+        row.swap(a, b)
+    }
+
+    let length = table.len();
+
+    let (first, last) = table.split_at_mut(b);
+
+    // Part 2
+    // Need to check index?
+    if b != length {
+        first[a][b..].swap_with_slice(&mut last[0][1..]);
+    }
+
+    // Part 3
+    first[a][0..0].swap_with_slice(&mut last[0][0..0]);
+
+    // Part 4
+    // TODO: Don't think this actually swaps the values. Rust might be copying the usizes s and w instead of swapping their values.
+    if b != a + 1 {
+        let (first_1, first_2) = first.split_at_mut(a + 1);
+
+        for (i, mut s) in first_1[a][1..(b-a)].iter_mut().enumerate() {
+            let mut w = &mut first_2[i][b - a];
+            (w, s) = (s, w)
+        }
+    }
+}
+
+// Assume length of table is equal to length of permutation.
+fn apply_permutation_to_group(table: &[Vec<usize>], permutation: &[usize]) -> Vec<Vec<usize>> {
+    let mut working_table = table.to_vec();
+    
+    for row in &mut working_table {
+        for column in row {
+            *column = permutation[*column];
+        }
+    }
+
+    let mut working_permutation = permutation.to_vec();
+    for i in 0..table.len() {
+        let j = working_permutation.iter().position(|x| x == &i).unwrap();
+        swap_rows_and_columns(&mut working_table, i, j);
+
+        working_permutation.swap(i, j);
+    }
+    
+    working_table
 }
 
 fn print_pretty_table(table: &[Vec<usize>]) {
@@ -391,15 +470,22 @@ fn speedtest_group_generation(f: &dyn Fn(usize) -> Vec<Vec<Vec<usize>>>, n: usiz
     (timings, sizes)
 }
 
+fn factorial(n: usize) -> usize {
+    let mut result = 1;
+
+    for i in 1..=n {
+        result *= i
+    }
+
+    result
+}
+
 fn main() {
     println!("Hello, world!");
-
-    let time = Instant::now();
-    let groups = generate_all_sudocurity_groups_new(9);
-    let time = time.elapsed().as_secs();
-
-    println!("Length: {}. Time passed: {} seconds", groups.len(), time);
-    
+    for i in 0..=10 {
+        let p = generate_all_permutations(i);
+        assert_eq!(p.len(), factorial(i));
+    }
 }
 
 #[cfg(test)]
