@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::time::Instant;
+use std::{time::Instant};
 
 // Table is stored as the rows of the upper triangular representation of the group operation table.
 // Becase there was no benefit to storing as rows of lower triangular that could outweigh the benefit
@@ -200,16 +200,13 @@ fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
     Some(true)
 }
 
-// TODO: Lifetimes?
-// TODO: Match or if let?
 // Takes a table, and tests associativity.
-// Returns None if it is not associative. Returns Some(v) with v being a new set of untested associativity checks.
-fn test_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> Option<Vec<[usize; 3]>> {
+// Returns None if it is not associative. Returns Some(v) with a vector of the remaining associativity checks.
+fn check_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> Option<Vec<[usize; 3]>> {
     
-    let mut new_associativity_checks: Vec<[usize; 3]>;
-    let mut kept_checks_indices: Vec<usize> = vec![];
+    let mut new_associativity_checks: Vec<[usize; 3]> = vec![];
 
-    for (i, triplet) in remaining_associatvity_checks.into_iter().enumerate() {
+    for (i, triplet) in remaining_associatvity_checks.iter().enumerate() {
         match test_triplet(table, triplet) {
             None => new_associativity_checks.push(*triplet),
             Some(b) if !b => return None,
@@ -227,13 +224,13 @@ fn test_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[us
     Some(new_associativity_checks)
 }
 
-// A more advanced
-fn test_associativity_advanced(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> Option<Vec<[usize; 3]>> {
+// Takes a table and tests the remaining associativity checks.
+// Returns None if not associative. Returns Some(v) with a subslice of the remaining_associativity_checks.
+fn check_associativity_advanced<'a>(table: &[Vec<usize>], remaining_associatvity_checks: &'a [[usize; 3]]) -> Option<&'a [[usize; 3]]> {
     
-    let mut new_associativity_checks: &[[usize; 3]];
     let mut remove_checks_indices: Vec<usize> = vec![];
 
-    for (i, triplet) in remaining_associatvity_checks.into_iter().enumerate() {
+    for (i, triplet) in remaining_associatvity_checks.iter().enumerate() {
         match test_triplet(table, triplet) {
             None => continue,
             Some(b) if !b => return None,
@@ -248,21 +245,74 @@ fn test_associativity_advanced(table: &[Vec<usize>], remaining_associatvity_chec
         // }
     }
 
-    let remaining = remaining_associatvity_checks.split(|triplet| match test_triplet(table, triplet) {
-        None => false,
-        Some(b) if !b => return None,
-        Some(_) => true,
-    } ).collect();
 
-    for i in kept_checks_indices.iter().rev() {
-        let (a, b) = remaining_associatvity_checks.split(pred)
-    }
+    
+    // for i in kept_checks_indices.iter().rev() {
+    //     let (a, b) = remaining_associatvity_checks.split(pred)
+    // }
 
-    Some(new_associativity_checks)
+    // Some(new_associativity_checks);
+
+    todo!()
 }
 
-fn group_generation_recursion_new(table: &[Vec<usize>], n: usize, remaining_associatvity_checks: &[[usize; 3]]) -> Vec<Vec<Vec<usize>>> {
-    todo!()
+
+// TODO: Overlapping code at the bottom
+fn group_generation_recursion_new(table: &Vec<Vec<usize>>, n: usize, remaining_associatvity_checks: &[[usize; 3]]) -> Vec<Vec<Vec<usize>>> {
+    let mut result: Vec<Vec<Vec<usize>>> = vec![];
+
+    if let Some(last_row) = table.last() {
+             
+        if table.len() == n {
+            return vec![table.to_vec()]
+        }
+
+        let row: usize;
+        let column: usize;
+
+        // Finding the position of the next value
+        // Find every value satisfying sudoku property and associativity and try again recursively.   
+
+        if last_row.len() == n - table.len() + 1 {
+            column = table.len();
+
+            'val: for i in 0..n {
+                for (j, r) in table.iter().enumerate() {
+                    if r[column - j] == i {
+                        continue 'val;
+                    }
+                }
+                let mut working_table = table.to_vec();
+                working_table.push(vec![i]);
+
+                if let Some(remaining_checks) = check_associativity(&working_table, remaining_associatvity_checks) {
+                    result.append(&mut group_generation_recursion_new(&working_table, n, &remaining_checks))
+                }
+            }
+        } else {
+            row = table.len() - 1;
+            column = last_row.len() + table.len() - 1;
+
+            'val: for i in 0..n {
+                if table[row].contains(&i) {
+                    continue 'val;
+                }
+                for (j, r) in table.iter().take(row).enumerate() {
+                    if r[row - j] == i || r[column - j] == i {
+                        continue 'val;
+                    }
+                }
+                let mut working_table = table.clone();
+                working_table.last_mut().unwrap().push(i);
+
+                if let Some(remaining_checks) = check_associativity(&working_table, remaining_associatvity_checks) {
+                    result.append(&mut group_generation_recursion_new(&working_table, n, &remaining_checks))
+                }
+            }
+        }
+    }
+    
+    result
 }
 
 fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
@@ -274,6 +324,7 @@ fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
         let working_table = vec![vec![i]];
         
         work.append(&mut group_generation_recursion_new(&working_table, n, &triplets));
+        println!("{i} is done");
     }
 
     work
@@ -322,44 +373,80 @@ fn print_pretty_table(table: &[Vec<usize>]) {
     println!("{border}");
 }
 
+fn speedtest_group_generation(f: &dyn Fn(usize) -> Vec<Vec<Vec<usize>>>, n: usize) -> (Vec<u64>, Vec<usize>) {
+    
+    let mut timings: Vec<u64> = vec![];
+    let mut sizes: Vec<usize> =vec![];
+
+    for i in 1..=n {
+
+        let time = Instant::now();
+        let groups = f(i);
+        let time = time.elapsed().as_secs();
+
+        timings.push(time);
+        sizes.push(groups.len());
+    }
+
+    (timings, sizes)
+}
+
 fn main() {
     println!("Hello, world!");
-    // println!("{:?}", generate_associativity_triplets(4));
+
     let time = Instant::now();
-    let groups = generate_all_sudocurity_groups(8);
+    let groups = generate_all_sudocurity_groups_new(9);
     let time = time.elapsed().as_secs();
-    // for g in &groups {
-    //     print_pretty_table(g);
-    // }
-    println!("{}", groups.len());
-    println!("{}", time);
+
+    println!("Length: {}. Time passed: {} seconds", groups.len(), time);
+    
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn test_generate_all_associativity_triplets() {
-        todo!()
+    // fn test_generate_all_associativity_triplets() {
+    //     todo!()
+    // }
+
+    // fn test_group_add() {
+    //     todo!()
+    // }
+
+    // fn test_is_group_associative() {
+    //     todo!()
+    // }
+
+    // fn test_group_generation_recursion() {
+    //     todo!()
+    // }
+
+    // fn test_generate_all_groups() {
+    //     todo!()
+    // }
+
+    // fn test_generate_all_sudocurity_groups() {
+    //     todo!()
+    // }
+
+    #[test]
+    fn test_compare_all_group_generation_old_and_new() {
+        let n = 6;
+
+        let groups_old = generate_all_groups(n);
+        let groups_new = generate_all_groups_new(n);
+
+        assert_eq!(groups_old, groups_new);
     }
 
-    fn test_group_add() {
-        todo!()
-    }
+    #[test]
+    fn test_compare_sudocurity_group_generation_old_and_new() {
+        let n = 6;
 
-    fn test_is_group_associative() {
-        todo!()
-    }
+        let groups_old = generate_all_sudocurity_groups(n);
+        let groups_new = generate_all_sudocurity_groups_new(n);
 
-    fn test_group_generation_recursion() {
-        todo!()
-    }
-
-    fn test_generate_all_groups() {
-        todo!()
-    }
-
-    fn test_generate_all_sudocurity_groups() {
-        todo!()
+        assert_eq!(groups_old, groups_new);
     }
 }
