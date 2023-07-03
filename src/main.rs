@@ -376,34 +376,35 @@ fn swap_rows_and_columns(table: &mut [Vec<usize>], a: usize, b: usize) {
         (a, b) = (b, a);
     }
 
-    // Part 1
-    for row in table.iter_mut().take(a) {
-        row.swap(a, b)
-    }
-
     let length = table.len();
 
     let (first, last) = table.split_at_mut(b);
 
+    // Part 1
+    for (i, row) in first.iter_mut().take(a).enumerate() {
+        row.swap(a - i, b - i)
+    }
+
     // Part 2
     // Need to check index?
     if b != length {
-        first[a][b..].swap_with_slice(&mut last[0][1..]);
+        first[a][(b-a + 1)..].swap_with_slice(&mut last[0][1..]);
     }
 
     // Part 3
-    first[a][0..0].swap_with_slice(&mut last[0][0..0]);
+    first[a][0..1].swap_with_slice(&mut last[0][0..1]);
 
     // Part 4
-    // TODO: Don't think this actually swaps the values. Rust might be copying the usizes s and w instead of swapping their values.
     if b != a + 1 {
         let (first_1, first_2) = first.split_at_mut(a + 1);
 
-        for (i, mut s) in first_1[a][1..(b-a)].iter_mut().enumerate() {
-            let mut w = &mut first_2[i][b - a];
-            (w, s) = (s, w)
+        for (i, f) in first_2.iter_mut().enumerate().take(b - a - 1) {
+            let s_1 = &mut first_1[a][(i + 1)..(i + 2)];
+            let s_2 = &mut f[(b - a - i - 1)..(b - a - i)];
+            s_1.swap_with_slice(s_2);
         }
     }
+
 }
 
 // Assume length of table is equal to length of permutation.
@@ -419,9 +420,12 @@ fn apply_permutation_to_group(table: &[Vec<usize>], permutation: &[usize]) -> Ve
     let mut working_permutation = permutation.to_vec();
     for i in 0..table.len() {
         let j = working_permutation.iter().position(|x| x == &i).unwrap();
-        swap_rows_and_columns(&mut working_table, i, j);
 
-        working_permutation.swap(i, j);
+        if i != j {
+            swap_rows_and_columns(&mut working_table, i, j);
+
+            working_permutation.swap(i, j);
+        }
     }
     
     working_table
@@ -482,10 +486,8 @@ fn factorial(n: usize) -> usize {
 
 fn main() {
     println!("Hello, world!");
-    for i in 0..=10 {
-        let p = generate_all_permutations(i);
-        assert_eq!(p.len(), factorial(i));
-    }
+    
+    
 }
 
 #[cfg(test)]
@@ -534,5 +536,18 @@ mod tests {
         let groups_new = generate_all_sudocurity_groups_new(n);
 
         assert_eq!(groups_old, groups_new);
+    }
+
+    #[test]
+    fn test_apply_permutation_to_group() {
+        let table = generate_all_sudocurity_groups_new(5);
+
+        let permutation = vec![0, 2, 3, 4, 1];
+
+        let new_t = apply_permutation_to_group(&table[3], &permutation);
+
+        assert_eq!(new_t, table[2]);
+
+
     }
 }
