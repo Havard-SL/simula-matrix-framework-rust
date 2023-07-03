@@ -16,7 +16,7 @@ fn generate_all_associativity_triplets(n: usize, zero_identity: bool) -> Vec<[us
         false => 0,
     };
 
-    for a in start..(n-1) {
+    for a in start..(n - 1) {
         for b in a..n {
             for c in b..n {
                 if a != c {
@@ -39,8 +39,8 @@ fn group_add(table: &[Vec<usize>], a: &usize, b: &usize) -> usize {
 
 fn is_group_associative(table: &[Vec<usize>]) -> bool {
     let triplets = match table[0][0] {
-       0 => generate_all_associativity_triplets(table.len(), true),
-       _ => generate_all_associativity_triplets(table.len(), false),
+        0 => generate_all_associativity_triplets(table.len(), true),
+        _ => generate_all_associativity_triplets(table.len(), false),
     };
 
     for triplet in &triplets {
@@ -53,7 +53,7 @@ fn is_group_associative(table: &[Vec<usize>]) -> bool {
         let r = group_add(table, a, &r);
 
         if l != r {
-            return false
+            return false;
         }
     }
 
@@ -63,16 +63,14 @@ fn is_group_associative(table: &[Vec<usize>]) -> bool {
 // Assume table is already a valid and non-empty table for the given values
 // TODO: Check associativity while running, not only at the end.
 fn group_generation_recursion(table: &Vec<Vec<usize>>, n: usize) -> Vec<Vec<Vec<usize>>> {
-    
     let mut result: Vec<Vec<Vec<usize>>> = vec![];
 
     if let Some(last_row) = table.last() {
-             
         if table.len() == n {
             if is_group_associative(table) {
-                return vec![table.clone()]
+                return vec![table.clone()];
             }
-            return vec![]
+            return vec![];
         }
 
         let row: usize;
@@ -113,9 +111,9 @@ fn group_generation_recursion(table: &Vec<Vec<usize>>, n: usize) -> Vec<Vec<Vec<
                 working_table.last_mut().unwrap().push(i);
                 result.append(&mut group_generation_recursion(&working_table, n))
             }
-        }        
+        }
     }
-    
+
     result
 }
 
@@ -157,12 +155,12 @@ fn group_add_new(table: &[Vec<usize>], a: &usize, b: &usize) -> Option<usize> {
             None
         }
     } else if let Some(row) = table.get(*b) {
-            // if let Some(column) = row.get(a - b) {
-            //     Some(*column)
-            // } else {
-            //     None
-            // }
-            row.get(a - b).copied()
+        // if let Some(column) = row.get(a - b) {
+        //     Some(*column)
+        // } else {
+        //     None
+        // }
+        row.get(a - b).copied()
     } else {
         None
     }
@@ -180,7 +178,7 @@ fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
         // }
         group_add_new(table, &l, c)?
     } else {
-        return None
+        return None;
     };
 
     let r = if let Some(r) = group_add_new(table, b, c) {
@@ -191,19 +189,21 @@ fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
         // }
         group_add_new(table, a, &r)?
     } else {
-        return None
+        return None;
     };
 
     if l != r {
-        return Some(false)
+        return Some(false);
     }
     Some(true)
 }
 
 // Takes a table, and tests associativity.
 // Returns None if it is not associative. Returns Some(v) with a vector of the remaining associativity checks.
-fn check_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[usize; 3]]) -> Option<Vec<[usize; 3]>> {
-    
+fn check_associativity(
+    table: &[Vec<usize>],
+    remaining_associatvity_checks: &[[usize; 3]],
+) -> Option<Vec<[usize; 3]>> {
     let mut new_associativity_checks: Vec<[usize; 3]> = vec![];
 
     for (i, triplet) in remaining_associatvity_checks.iter().enumerate() {
@@ -226,8 +226,10 @@ fn check_associativity(table: &[Vec<usize>], remaining_associatvity_checks: &[[u
 
 // Takes a table and tests the remaining associativity checks.
 // Returns None if not associative. Returns Some(v) with a subslice of the remaining_associativity_checks.
-fn check_associativity_advanced<'a>(table: &[Vec<usize>], remaining_associatvity_checks: &'a [[usize; 3]]) -> Option<&'a [[usize; 3]]> {
-    
+fn check_associativity_advanced<'a>(
+    table: &[Vec<usize>],
+    remaining_associatvity_checks: &'a [[usize; 3]],
+) -> Option<&'a [[usize; 3]]> {
     let mut remove_checks_indices: Vec<usize> = vec![];
 
     for (i, triplet) in remaining_associatvity_checks.iter().enumerate() {
@@ -245,8 +247,6 @@ fn check_associativity_advanced<'a>(table: &[Vec<usize>], remaining_associatvity
         // }
     }
 
-
-    
     // for i in kept_checks_indices.iter().rev() {
     //     let (a, b) = remaining_associatvity_checks.split(pred)
     // }
@@ -256,22 +256,24 @@ fn check_associativity_advanced<'a>(table: &[Vec<usize>], remaining_associatvity
     todo!()
 }
 
-
 // TODO: Overlapping code at the bottom
-fn group_generation_recursion_new(table: &Vec<Vec<usize>>, n: usize, remaining_associatvity_checks: &[[usize; 3]]) -> Vec<Vec<Vec<usize>>> {
+fn group_generation_recursion_new(
+    table: &Vec<Vec<usize>>,
+    n: usize,
+    remaining_associatvity_checks: &[[usize; 3]],
+) -> Vec<Vec<Vec<usize>>> {
     let mut result: Vec<Vec<Vec<usize>>> = vec![];
 
     if let Some(last_row) = table.last() {
-             
         if table.len() == n {
-            return vec![table.to_vec()]
+            return vec![table.to_vec()];
         }
 
         let row: usize;
         let column: usize;
 
         // Finding the position of the next value
-        // Find every value satisfying sudoku property and associativity and try again recursively.   
+        // Find every value satisfying sudoku property and associativity and try again recursively.
 
         if last_row.len() == n - table.len() + 1 {
             column = table.len();
@@ -285,8 +287,14 @@ fn group_generation_recursion_new(table: &Vec<Vec<usize>>, n: usize, remaining_a
                 let mut working_table = table.to_vec();
                 working_table.push(vec![i]);
 
-                if let Some(remaining_checks) = check_associativity(&working_table, remaining_associatvity_checks) {
-                    result.append(&mut group_generation_recursion_new(&working_table, n, &remaining_checks))
+                if let Some(remaining_checks) =
+                    check_associativity(&working_table, remaining_associatvity_checks)
+                {
+                    result.append(&mut group_generation_recursion_new(
+                        &working_table,
+                        n,
+                        &remaining_checks,
+                    ))
                 }
             }
         } else {
@@ -305,13 +313,19 @@ fn group_generation_recursion_new(table: &Vec<Vec<usize>>, n: usize, remaining_a
                 let mut working_table = table.clone();
                 working_table.last_mut().unwrap().push(i);
 
-                if let Some(remaining_checks) = check_associativity(&working_table, remaining_associatvity_checks) {
-                    result.append(&mut group_generation_recursion_new(&working_table, n, &remaining_checks))
+                if let Some(remaining_checks) =
+                    check_associativity(&working_table, remaining_associatvity_checks)
+                {
+                    result.append(&mut group_generation_recursion_new(
+                        &working_table,
+                        n,
+                        &remaining_checks,
+                    ))
                 }
             }
         }
     }
-    
+
     result
 }
 
@@ -322,8 +336,12 @@ fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
 
     for i in 0..n {
         let working_table = vec![vec![i]];
-        
-        work.append(&mut group_generation_recursion_new(&working_table, n, &triplets));
+
+        work.append(&mut group_generation_recursion_new(
+            &working_table,
+            n,
+            &triplets,
+        ));
         println!("{i} is done");
     }
 
@@ -338,7 +356,11 @@ fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
     let v = (0..n).collect();
 
     let working_table = vec![v];
-    work.append(&mut group_generation_recursion_new(&working_table, n, &triplets));
+    work.append(&mut group_generation_recursion_new(
+        &working_table,
+        n,
+        &triplets,
+    ));
 
     work
 }
@@ -347,9 +369,9 @@ fn permutation_recursion(n: usize, part_of_permutation: Vec<usize>) -> Vec<Vec<u
     if part_of_permutation.len() == n {
         return vec![part_of_permutation];
     }
-    
+
     let mut result: Vec<Vec<usize>> = vec![];
-    
+
     for i in 0..n {
         if !part_of_permutation.contains(&i) {
             let mut new_permutation = part_of_permutation.clone();
@@ -357,7 +379,7 @@ fn permutation_recursion(n: usize, part_of_permutation: Vec<usize>) -> Vec<Vec<u
             result.append(&mut permutation_recursion(n, new_permutation));
         }
     }
-    
+
     result
 }
 
@@ -368,7 +390,6 @@ fn generate_all_permutations(n: usize) -> Vec<Vec<usize>> {
 
 // a < b
 fn swap_rows_and_columns(table: &mut [Vec<usize>], a: usize, b: usize) {
-
     let mut a = a;
     let mut b = b;
 
@@ -388,7 +409,7 @@ fn swap_rows_and_columns(table: &mut [Vec<usize>], a: usize, b: usize) {
     // Part 2
     // Need to check index?
     if b != length {
-        first[a][(b-a + 1)..].swap_with_slice(&mut last[0][1..]);
+        first[a][(b - a + 1)..].swap_with_slice(&mut last[0][1..]);
     }
 
     // Part 3
@@ -404,13 +425,12 @@ fn swap_rows_and_columns(table: &mut [Vec<usize>], a: usize, b: usize) {
             s_1.swap_with_slice(s_2);
         }
     }
-
 }
 
 // Assume length of table is equal to length of permutation.
 fn apply_permutation_to_group(table: &[Vec<usize>], permutation: &[usize]) -> Vec<Vec<usize>> {
     let mut working_table = table.to_vec();
-    
+
     for row in &mut working_table {
         for column in row {
             *column = permutation[*column];
@@ -427,12 +447,12 @@ fn apply_permutation_to_group(table: &[Vec<usize>], permutation: &[usize]) -> Ve
             working_permutation.swap(i, j);
         }
     }
-    
+
     working_table
 }
 
 fn print_pretty_table(table: &[Vec<usize>]) {
-    let n = table.len()*3 + 3;
+    let n = table.len() * 3 + 3;
     let border = "-".repeat(n);
     println!("{border}");
     for row in 0..table.len() {
@@ -456,13 +476,14 @@ fn print_pretty_table(table: &[Vec<usize>]) {
     println!("{border}");
 }
 
-fn speedtest_group_generation(f: &dyn Fn(usize) -> Vec<Vec<Vec<usize>>>, n: usize) -> (Vec<u64>, Vec<usize>) {
-    
+fn speedtest_group_generation(
+    f: &dyn Fn(usize) -> Vec<Vec<Vec<usize>>>,
+    n: usize,
+) -> (Vec<u64>, Vec<usize>) {
     let mut timings: Vec<u64> = vec![];
-    let mut sizes: Vec<usize> =vec![];
+    let mut sizes: Vec<usize> = vec![];
 
     for i in 1..=n {
-
         let time = Instant::now();
         let groups = f(i);
         let time = time.elapsed().as_secs();
@@ -486,8 +507,6 @@ fn factorial(n: usize) -> usize {
 
 fn main() {
     println!("Hello, world!");
-    
-    
 }
 
 #[cfg(test)]
@@ -547,7 +566,5 @@ mod tests {
         let new_t = apply_permutation_to_group(&table[3], &permutation);
 
         assert_eq!(new_t, table[2]);
-
-
     }
 }
