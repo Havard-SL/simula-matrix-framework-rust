@@ -703,6 +703,39 @@ fn try_exist_perm_for_every_group_gives_automorphism(n: usize) {
     println!("Working: {}, Non-working: {}", working_groups.len(), non_working_groups.len());
 }
 
+fn try_permutation_affine_automorphism(n: usize) {
+    let length = factorial(n-1);
+
+    let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
+
+    let groups = generate_all_groups_new(n);
+    bar.inc(1);
+    let permutations = generate_all_permutations(n);
+    bar.inc(1);
+
+    let mut working_permutations: Vec<Vec<usize>> = vec![];
+    let mut non_working_permutations: Vec<Vec<usize>> = vec![];
+
+    'perm: for p in &permutations {
+        bar.inc(1);
+        for g in &groups {
+            todo!()
+
+        }
+        non_working_permutations.push(p.clone());
+    }
+
+    println!("Working:");
+    for w in &working_permutations {
+        println!("{:?}", w);
+    }
+    println!("Non-working:");
+    for w in &non_working_permutations {
+        println!("{:?}", w)
+    }
+    println!("{}, {}", working_permutations.len(), non_working_permutations.len());
+}
+
 fn main() {
     println!("Hello, world!");
 
