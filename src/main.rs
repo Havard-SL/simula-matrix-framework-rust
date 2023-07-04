@@ -619,11 +619,11 @@ fn try_permutation_gives_automorphism(n: usize) {
     }
 
     println!("Working:");
-    for w in &working_permutations {
+    for w in working_permutations.iter().take(10) {
         println!("{:?}", w);
     }
     println!("Non-working:");
-    for w in &non_working_permutations {
+    for w in non_working_permutations.iter().take(10) {
         println!("{:?}", w)
     }
     println!("{}, {}", working_permutations.len(), non_working_permutations.len());
