@@ -144,6 +144,7 @@ fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
 // Old functions above, new functions below. ###################################################################3
 
 // TODO: Write cleaner with "?" operator.
+// TODO: Can be optimized?
 fn group_add_new(table: &[Vec<usize>], a: &usize, b: &usize) -> Option<usize> {
     if b > a {
         if let Some(row) = table.get(*a) {
@@ -169,6 +170,7 @@ fn group_add_new(table: &[Vec<usize>], a: &usize, b: &usize) -> Option<usize> {
 }
 
 // TODO: Write cleaner with "?" operator.
+// TODO: Can be optimized?
 fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
     let [a, b, c] = triplet;
 
@@ -202,6 +204,7 @@ fn test_triplet(table: &[Vec<usize>], triplet: &[usize; 3]) -> Option<bool> {
 
 // Takes a table, and tests associativity.
 // Returns None if it is not associative. Returns Some(v) with a vector of the remaining associativity checks.
+// TODO: Can be optimized?
 fn check_associativity(
     table: &[Vec<usize>],
     remaining_associatvity_checks: &[[usize; 3]],
@@ -359,14 +362,11 @@ fn load_groups(n: usize, sudocurity: bool) -> Option<Vec<Vec<Vec<usize>>>> {
     let groups = fs::read_to_string(path).unwrap();
     let groups: Vec<Vec<Vec<usize>>> = serde_json::from_str(&groups).unwrap();
 
-    // println!("Loaded!");
-
     Some(groups)
 }
 
 fn save_groups(n: usize, sudocurity: bool, groups: &Vec<Vec<Vec<usize>>>) {
     let path = generate_path(n, sudocurity);
-    println!("{}", &path);
     let path = Path::new(&path);
 
     let groups = serde_json::to_string(groups).unwrap();
@@ -409,16 +409,34 @@ fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
 
     let mut work: Vec<Vec<Vec<usize>>> = vec![];
 
-    let triplets = generate_all_associativity_triplets(n, true);
+    if n == 1 {
+        work = vec![vec![vec![0]]];
+    } else {
 
-    let v = (0..n).collect();
+        let bar = ProgressBar::new(n as u64 - 1);
+        
+        let triplets = generate_all_associativity_triplets(n, true);
 
-    let working_table = vec![v];
-    work.append(&mut group_generation_recursion_new(
-        &working_table,
-        n,
-        &triplets,
-    ));
+        let v = (0..n).collect();
+
+        let working_table = vec![v];
+        
+        let mut v = vec![0];
+        v.append(&mut (2..n).collect());
+
+        for i in v {
+            let mut w = working_table.clone();
+
+            w.push(vec![i]);
+            
+            work.append(&mut group_generation_recursion_new(
+                &w,
+                n,
+                &triplets,
+            ));
+            bar.inc(1);
+        }
+    }
 
     save_groups(n, true, &work);
 
@@ -687,16 +705,6 @@ fn try_exist_perm_for_every_group_gives_automorphism(n: usize) {
 
 fn main() {
     println!("Hello, world!");
-
-    let n = 9;
-
-    for i in 1..=n {
-        let groups = generate_all_sudocurity_groups_new(i);
-
-        let f = factorial(i - 1);
-
-        println!("{}, {}", groups.len(), factorial(i - 1));
-    }
 
 }
 
