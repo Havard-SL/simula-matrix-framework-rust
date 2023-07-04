@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::{time::Instant, vec};
+use std::{time::Instant, vec, fs};
+use indicatif::ProgressBar;
+use std::path::Path;
 
 // Table is stored as the rows of the upper triangular representation of the group operation table.
 // Becase there was no benefit to storing as rows of lower triangular that could outweigh the benefit
@@ -329,10 +331,59 @@ fn group_generation_recursion_new(
     result
 }
 
+fn generate_path(n: usize, sudocurity: bool) -> String {
+    let mut path = "data/".to_string();
+
+    if sudocurity {
+        path.push_str("sudocurity/")
+    } else {
+        path.push_str("all/")
+    }
+
+    path.push_str(&n.to_string());
+
+    path.push_str(".json");
+
+    path
+}
+
+fn load_groups(n: usize, sudocurity: bool) -> Option<Vec<Vec<Vec<usize>>>> {
+
+    let path = generate_path(n, sudocurity);
+    let path = Path::new(&path);
+
+    if !path.exists() {
+        return None
+    }
+
+    let groups = fs::read_to_string(path).unwrap();
+    let groups: Vec<Vec<Vec<usize>>> = serde_json::from_str(&groups).unwrap();
+
+    // println!("Loaded!");
+
+    Some(groups)
+}
+
+fn save_groups(n: usize, sudocurity: bool, groups: &Vec<Vec<Vec<usize>>>) {
+    let path = generate_path(n, sudocurity);
+    println!("{}", &path);
+    let path = Path::new(&path);
+
+    let groups = serde_json::to_string(groups).unwrap();
+    fs::write(path, groups).unwrap()
+}
+
 fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
+
+    if let Some(groups) = load_groups(n, false) {
+        return groups;
+    }
+
     let mut work: Vec<Vec<Vec<usize>>> = vec![];
 
     let triplets = generate_all_associativity_triplets(n, false);
+
+    let bar = ProgressBar::new(n as u64);
 
     for i in 0..n {
         let working_table = vec![vec![i]];
@@ -342,13 +393,20 @@ fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
             n,
             &triplets,
         ));
-        println!("{i} is done");
+        bar.inc(1);
     }
+
+    save_groups(n, false, &work);
 
     work
 }
 
 fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
+
+    if let Some(groups) = load_groups(n, true) {
+        return groups;
+    }
+
     let mut work: Vec<Vec<Vec<usize>>> = vec![];
 
     let triplets = generate_all_associativity_triplets(n, true);
@@ -361,6 +419,8 @@ fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
         n,
         &triplets,
     ));
+
+    save_groups(n, true, &work);
 
     work
 }
@@ -386,6 +446,10 @@ fn permutation_recursion(n: usize, part_of_permutation: Vec<usize>) -> Vec<Vec<u
 // TODO: Permutation struct
 fn generate_all_permutations(n: usize) -> Vec<Vec<usize>> {
     permutation_recursion(n, vec![])
+}
+
+fn generate_sudocurity_permutations(n: usize) -> Vec<Vec<usize>> {
+    permutation_recursion(n, vec![0])
 }
 
 // a < b
@@ -505,8 +569,135 @@ fn factorial(n: usize) -> usize {
     result
 }
 
+fn try_permutation_gives_automorphism(n: usize) {
+    let length = factorial(n-1);
+
+    let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
+
+    let groups = generate_all_sudocurity_groups_new(n);
+    bar.inc(1);
+    let permutations = generate_sudocurity_permutations(n);
+    bar.inc(1);
+
+    let mut working_permutations: Vec<Vec<usize>> = vec![];
+    let mut non_working_permutations: Vec<Vec<usize>> = vec![];
+
+    'perm: for p in &permutations {
+        bar.inc(1);
+        for g in &groups {
+            let test = apply_permutation_to_group(g, p);
+            // assert!(groups.contains(&test));
+
+            if test == *g {
+                working_permutations.push(p.clone());
+                continue 'perm;
+            }
+
+            // println!("---------");
+            // print_pretty_table(&test);
+            // print_pretty_table(g);
+        }
+        non_working_permutations.push(p.clone());
+    }
+
+    println!("Working:");
+    for w in &working_permutations {
+        println!("{:?}", w);
+    }
+    println!("Non-working:");
+    for w in &non_working_permutations {
+        println!("{:?}", w)
+    }
+    println!("{}, {}", working_permutations.len(), non_working_permutations.len());
+}
+
+fn try_permutation_is_group_op(n: usize) {
+    let length = factorial(n-1);
+
+    let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
+
+    let groups = generate_all_groups_new(n);
+    bar.inc(1);
+    let permutations = generate_all_permutations(n);
+    bar.inc(1);
+
+    let mut working_permutations: Vec<Vec<usize>> = vec![];
+    let mut non_working_permutations: Vec<Vec<usize>> = vec![];
+
+    'perm: for p in &permutations {
+        bar.inc(1);
+        for g in &groups {
+            if g.contains(p) {
+                working_permutations.push(p.clone());
+                continue 'perm;
+            }
+
+        }
+        non_working_permutations.push(p.clone());
+    }
+
+    println!("Working:");
+    for w in &working_permutations {
+        println!("{:?}", w);
+    }
+    println!("Non-working:");
+    for w in &non_working_permutations {
+        println!("{:?}", w)
+    }
+    println!("{}, {}", working_permutations.len(), non_working_permutations.len());
+}
+
+fn try_exist_perm_for_every_group_gives_automorphism(n: usize) {
+
+    let groups = generate_all_sudocurity_groups_new(n);
+    
+    let length = groups.len();
+
+    let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
+
+    bar.inc(1);
+    let permutations = generate_sudocurity_permutations(n);
+    bar.inc(1);
+
+    let mut working_groups: Vec<Vec<Vec<usize>>> = vec![];
+    let mut non_working_groups: Vec<Vec<Vec<usize>>> = vec![];
+
+    'groups: for g in &groups {
+        bar.inc(1);
+        for p in permutations.iter().skip(1) {
+            let t = apply_permutation_to_group(g, p);
+            if &t == g {
+                working_groups.push(g.clone());
+                continue 'groups;
+            }
+        }
+        non_working_groups.push(g.clone());
+    }
+
+    // println!("Working:");
+    // for w in &working_groups {
+    //     println!("{:?}", w);
+    // }
+    // println!("Non-working:");
+    // for w in &non_working_groups {
+    //     println!("{:?}", w)
+    // }
+    println!("Working: {}, Non-working: {}", working_groups.len(), non_working_groups.len());
+}
+
 fn main() {
     println!("Hello, world!");
+
+    let n = 9;
+
+    for i in 1..=n {
+        let groups = generate_all_sudocurity_groups_new(i);
+
+        let f = factorial(i - 1);
+
+        println!("{}, {}", groups.len(), factorial(i - 1));
+    }
+
 }
 
 #[cfg(test)]
@@ -566,5 +757,22 @@ mod tests {
         let new_t = apply_permutation_to_group(&table[3], &permutation);
 
         assert_eq!(new_t, table[2]);
+    }
+
+    #[test]
+    fn test_apply_permutation_to_group_2() {
+
+        let n = 7;
+
+        let groups = generate_all_sudocurity_groups_new(n);
+        let permutations = generate_sudocurity_permutations(n);
+
+        for (i, p) in permutations.iter().enumerate() {
+            for g in &groups {
+                let test = apply_permutation_to_group(g, p);
+
+                assert!(groups.contains(&test))
+            }
+        }
     }
 }
