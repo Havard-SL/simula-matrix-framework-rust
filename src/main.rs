@@ -766,10 +766,62 @@ fn try_permutation_affine_automorphism(n: usize) {
     );
 }
 
+fn try_permutations_equal_in_isomorphism_class(n: usize) {
+    let length = factorial(n - 1);
+
+    let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
+
+    let groups = generate_all_sudocurity_groups_new(n);
+    bar.inc(1);
+    let permutations = generate_sudocurity_permutations(n);
+    bar.inc(1);
+
+    let mut working_permutations: Vec<Vec<Vec<usize>>> = vec![];
+
+    for g in &groups {
+        bar.inc(1);
+        let mut working: Vec<Vec<usize>> = vec![];
+
+        for p in &permutations {
+            let test = apply_permutation_to_group(g, p);
+
+            if &test == g {
+                working.push(p.clone())
+            }
+        }
+        working_permutations.push(working);
+    }
+
+    let length = working_permutations.len();
+
+    for (i, p) in working_permutations.iter().enumerate() {
+        println!("{:?}", p);
+        // print_pretty_table(&groups[i]);
+    }
+
+    println!(
+        "{}",
+        working_permutations.len(),
+    );
+
+    // for i in 0..length {
+    //     let w = working_permutations.pop().unwrap();
+    //     if working_permutations.contains(&w) {
+    //         println!("{i}, There is equality!")
+    //     }
+    // }
+
+    // println!("Working:");
+    // for w in working_permutations.iter().take(10) {
+    //     println!("{:?}", w);
+    // }
+}
+
 fn main() {
     println!("Hello, world!");
 
-    try_permutation_affine_automorphism(5);
+    try_permutations_equal_in_isomorphism_class(4);
+    try_permutation_gives_automorphism(4);
 }
 
 #[cfg(test)]
