@@ -792,29 +792,11 @@ fn try_permutations_equal_in_isomorphism_class(n: usize) {
         working_permutations.push(working);
     }
 
-    let length = working_permutations.len();
-
-    for (i, p) in working_permutations.iter().enumerate() {
+    for p in working_permutations.iter() {
         println!("{:?}", p);
-        // print_pretty_table(&groups[i]);
     }
 
-    println!(
-        "{}",
-        working_permutations.len(),
-    );
-
-    // for i in 0..length {
-    //     let w = working_permutations.pop().unwrap();
-    //     if working_permutations.contains(&w) {
-    //         println!("{i}, There is equality!")
-    //     }
-    // }
-
-    // println!("Working:");
-    // for w in working_permutations.iter().take(10) {
-    //     println!("{:?}", w);
-    // }
+    println!("{}", working_permutations.len(),);
 }
 
 fn main() {
