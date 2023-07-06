@@ -810,30 +810,6 @@ fn main() {
 mod tests {
     use super::*;
 
-    // fn test_generate_all_associativity_triplets() {
-    //     todo!()
-    // }
-
-    // fn test_group_add() {
-    //     todo!()
-    // }
-
-    // fn test_is_group_associative() {
-    //     todo!()
-    // }
-
-    // fn test_group_generation_recursion() {
-    //     todo!()
-    // }
-
-    // fn test_generate_all_groups() {
-    //     todo!()
-    // }
-
-    // fn test_generate_all_sudocurity_groups() {
-    //     todo!()
-    // }
-
     #[test]
     fn test_compare_all_group_generation_old_and_new() {
         let n = 6;
