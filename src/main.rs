@@ -1,9 +1,8 @@
 #![allow(dead_code)]
-#![allow(unused_variables)]
 
-use std::{time::Instant, vec, fs};
 use indicatif::ProgressBar;
 use std::path::Path;
+use std::{fs, time::Instant, vec};
 
 // Table is stored as the rows of the upper triangular representation of the group operation table.
 // Becase there was no benefit to storing as rows of lower triangular that could outweigh the benefit
@@ -211,7 +210,7 @@ fn check_associativity(
 ) -> Option<Vec<[usize; 3]>> {
     let mut new_associativity_checks: Vec<[usize; 3]> = vec![];
 
-    for (i, triplet) in remaining_associatvity_checks.iter().enumerate() {
+    for triplet in remaining_associatvity_checks.iter() {
         match test_triplet(table, triplet) {
             None => new_associativity_checks.push(*triplet),
             Some(b) if !b => return None,
@@ -351,12 +350,11 @@ fn generate_path(n: usize, sudocurity: bool) -> String {
 }
 
 fn load_groups(n: usize, sudocurity: bool) -> Option<Vec<Vec<Vec<usize>>>> {
-
     let path = generate_path(n, sudocurity);
     let path = Path::new(&path);
 
     if !path.exists() {
-        return None
+        return None;
     }
 
     let groups = fs::read_to_string(path).unwrap();
@@ -374,7 +372,6 @@ fn save_groups(n: usize, sudocurity: bool, groups: &Vec<Vec<Vec<usize>>>) {
 }
 
 fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
-
     if let Some(groups) = load_groups(n, false) {
         return groups;
     }
@@ -402,7 +399,6 @@ fn generate_all_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
 }
 
 fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
-
     if let Some(groups) = load_groups(n, true) {
         return groups;
     }
@@ -412,15 +408,14 @@ fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
     if n == 1 {
         work = vec![vec![vec![0]]];
     } else {
-
         let bar = ProgressBar::new(n as u64 - 1);
-        
+
         let triplets = generate_all_associativity_triplets(n, true);
 
         let v = (0..n).collect();
 
         let working_table = vec![v];
-        
+
         let mut v = vec![0];
         v.append(&mut (2..n).collect());
 
@@ -428,12 +423,8 @@ fn generate_all_sudocurity_groups_new(n: usize) -> Vec<Vec<Vec<usize>>> {
             let mut w = working_table.clone();
 
             w.push(vec![i]);
-            
-            work.append(&mut group_generation_recursion_new(
-                &w,
-                n,
-                &triplets,
-            ));
+
+            work.append(&mut group_generation_recursion_new(&w, n, &triplets));
             bar.inc(1);
         }
     }
@@ -588,7 +579,7 @@ fn factorial(n: usize) -> usize {
 }
 
 fn try_permutation_gives_automorphism(n: usize) {
-    let length = factorial(n-1);
+    let length = factorial(n - 1);
 
     let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
 
@@ -626,11 +617,15 @@ fn try_permutation_gives_automorphism(n: usize) {
     for w in non_working_permutations.iter().take(10) {
         println!("{:?}", w)
     }
-    println!("{}, {}", working_permutations.len(), non_working_permutations.len());
+    println!(
+        "{}, {}",
+        working_permutations.len(),
+        non_working_permutations.len()
+    );
 }
 
 fn try_permutation_is_group_op(n: usize) {
-    let length = factorial(n-1);
+    let length = factorial(n - 1);
 
     let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
 
@@ -649,26 +644,28 @@ fn try_permutation_is_group_op(n: usize) {
                 working_permutations.push(p.clone());
                 continue 'perm;
             }
-
         }
         non_working_permutations.push(p.clone());
     }
 
     println!("Working:");
-    for w in &working_permutations {
+    for w in working_permutations.iter().take(10) {
         println!("{:?}", w);
     }
     println!("Non-working:");
-    for w in &non_working_permutations {
+    for w in non_working_permutations.iter().take(10) {
         println!("{:?}", w)
     }
-    println!("{}, {}", working_permutations.len(), non_working_permutations.len());
+    println!(
+        "{}, {}",
+        working_permutations.len(),
+        non_working_permutations.len()
+    );
 }
 
 fn try_exist_perm_for_every_group_gives_automorphism(n: usize) {
-
     let groups = generate_all_sudocurity_groups_new(n);
-    
+
     let length = groups.len();
 
     let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
@@ -692,19 +689,39 @@ fn try_exist_perm_for_every_group_gives_automorphism(n: usize) {
         non_working_groups.push(g.clone());
     }
 
-    // println!("Working:");
-    // for w in &working_groups {
-    //     println!("{:?}", w);
-    // }
-    // println!("Non-working:");
-    // for w in &non_working_groups {
-    //     println!("{:?}", w)
-    // }
-    println!("Working: {}, Non-working: {}", working_groups.len(), non_working_groups.len());
+    println!("Working:");
+    for w in &working_groups {
+        print_pretty_table(w);
+    }
+    println!("Non-working:");
+    for w in &non_working_groups {
+        print_pretty_table(w);
+    }
+    println!(
+        "Working: {}, Non-working: {}",
+        working_groups.len(),
+        non_working_groups.len()
+    );
+}
+
+fn compose_affine_permutation(
+    permutation: &[usize],
+    table: &[Vec<usize>],
+    row: &usize,
+) -> Vec<usize> {
+    let mut perm: Vec<usize> = vec![];
+
+    for p in permutation.iter() {
+        let a = group_add_new(table, p, row).unwrap();
+
+        perm.push(a);
+    }
+
+    perm
 }
 
 fn try_permutation_affine_automorphism(n: usize) {
-    let length = factorial(n-1);
+    let length = factorial(n);
 
     let bar = ProgressBar::new(TryInto::<u64>::try_into(length).unwrap() + 2_u64);
 
@@ -719,26 +736,40 @@ fn try_permutation_affine_automorphism(n: usize) {
     'perm: for p in &permutations {
         bar.inc(1);
         for g in &groups {
-            todo!()
+            for i in 0..g.len() {
+                let perm = compose_affine_permutation(p, g, &i);
 
+                let t = apply_permutation_to_group(g, &perm);
+
+                if g == &t {
+                    working_permutations.push(p.clone());
+
+                    continue 'perm;
+                }
+            }
         }
         non_working_permutations.push(p.clone());
     }
 
     println!("Working:");
-    for w in &working_permutations {
+    for w in working_permutations.iter().take(100) {
         println!("{:?}", w);
     }
     println!("Non-working:");
-    for w in &non_working_permutations {
+    for w in non_working_permutations.iter().take(100) {
         println!("{:?}", w)
     }
-    println!("{}, {}", working_permutations.len(), non_working_permutations.len());
+    println!(
+        "{}, {}",
+        working_permutations.len(),
+        non_working_permutations.len()
+    );
 }
 
 fn main() {
     println!("Hello, world!");
 
+    try_permutation_affine_automorphism(5);
 }
 
 #[cfg(test)]
@@ -802,13 +833,12 @@ mod tests {
 
     #[test]
     fn test_apply_permutation_to_group_2() {
-
         let n = 7;
 
         let groups = generate_all_sudocurity_groups_new(n);
         let permutations = generate_sudocurity_permutations(n);
 
-        for (i, p) in permutations.iter().enumerate() {
+        for p in permutations.iter() {
             for g in &groups {
                 let test = apply_permutation_to_group(g, p);
 
