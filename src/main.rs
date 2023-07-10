@@ -813,9 +813,7 @@ impl Permutation {
         result
     }
 
-    fn print(&self) {
-
-    }
+    fn print(&self) {}
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -826,7 +824,6 @@ struct PartialLatinSquare(Vec<Vec<usize>>);
 //         self.0.len() == n && self.0.last().unwrap().len() == n
 //     }
 // }
-
 
 // May run faster if split up the cases where col = n or not?
 fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSquare> {
@@ -843,7 +840,6 @@ fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSqu
     }
 
     'val: for i in 0..n {
-
         // Check if i exists on current row.
         if let Some(l) = partial.0.get(row) {
             if l.contains(&i) {
@@ -923,9 +919,9 @@ impl LatinSquare {
             super_string.push_str(newline);
         }
         super_string.push_str(&border);
-        
+
         println!("{}", super_string)
-        }
+    }
 
     fn generate_all(n: usize) -> Vec<LatinSquare> {
         let mut result: Vec<LatinSquare> = vec![];
@@ -943,7 +939,6 @@ impl LatinSquare {
     }
 
     fn apply_permutation(&mut self, mut p: Permutation) {
-
         for row in self.0.iter_mut() {
             for column in row.iter_mut() {
                 *column = p.0[*column]
@@ -967,9 +962,8 @@ impl LatinSquare {
         }
     }
 
-    fn classify(&self) -> LatinStructure {      
-
-        // Check if it contains a right-identity 
+    fn classify(&self) -> LatinStructure {
+        // Check if it contains a right-identity
         let mut standard: Vec<usize> = (0..self.0.len()).collect();
 
         if !self.0.contains(&standard) {
@@ -984,7 +978,7 @@ impl LatinSquare {
 
             if c != row[column] {
                 return LatinStructure::Quasigroup;
-            } 
+            }
         }
 
         // Check if associative
@@ -1036,13 +1030,16 @@ impl LatinSquare {
 }
 
 fn try_class_preserved_after_conjugacy(n: usize) {
-
     let squares = LatinSquare::generate_all(n);
 
-    let mut classifications: (Vec<LatinSquare>, Vec<LatinSquare>, Vec<LatinSquare>, Vec<LatinSquare>) = (vec![], vec![], vec![], vec![]);
+    let mut classifications: (
+        Vec<LatinSquare>,
+        Vec<LatinSquare>,
+        Vec<LatinSquare>,
+        Vec<LatinSquare>,
+    ) = (vec![], vec![], vec![], vec![]);
 
     for s in &squares {
-
         let c = s.classify();
 
         match c {
@@ -1051,7 +1048,6 @@ fn try_class_preserved_after_conjugacy(n: usize) {
             LatinStructure::Group => classifications.2.push(s.clone()),
             LatinStructure::Abelian => classifications.3.push(s.clone()),
         }
-
     }
 
     let (q, l, g, a) = classifications;
@@ -1066,7 +1062,6 @@ fn try_class_preserved_after_conjugacy(n: usize) {
     for p in perms {
         bar.inc(1);
         for s in q.iter() {
-
             let mut test = s.clone();
 
             test.apply_permutation(p.clone());
@@ -1075,11 +1070,9 @@ fn try_class_preserved_after_conjugacy(n: usize) {
                 println!("q FAILED!");
                 panic!();
             }
-
         }
 
         for s in l.iter() {
-
             let mut test = s.clone();
 
             test.apply_permutation(p.clone());
@@ -1091,7 +1084,6 @@ fn try_class_preserved_after_conjugacy(n: usize) {
         }
 
         for s in g.iter() {
-
             let mut test = s.clone();
 
             test.apply_permutation(p.clone());
@@ -1103,7 +1095,6 @@ fn try_class_preserved_after_conjugacy(n: usize) {
         }
 
         for s in a.iter() {
-
             let mut test = s.clone();
 
             test.apply_permutation(p.clone());
@@ -1118,7 +1109,6 @@ fn try_class_preserved_after_conjugacy(n: usize) {
 
 fn main() {
     println!("Hello, world!");
-
 }
 
 #[cfg(test)]
