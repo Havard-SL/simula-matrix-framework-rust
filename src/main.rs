@@ -800,6 +800,7 @@ fn try_permutations_equal_in_isomorphism_class(n: usize) {
 }
 
 // x -> p[x] is a permutation.
+#[derive(Debug, Clone, PartialEq)]
 struct Permutation(Vec<usize>);
 
 impl Permutation {
@@ -817,7 +818,7 @@ impl Permutation {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct PartialLatinSquare(Vec<Vec<usize>>);
 
 // impl PartialLatinSquare {
@@ -878,7 +879,7 @@ fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSqu
     result
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 enum LatinStructure {
     Quasigroup,
     Loop,
@@ -887,7 +888,7 @@ enum LatinStructure {
 }
 
 // Represented as a vector of the rows of the latin square, where the rows are vectors of usize.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 struct LatinSquare(Vec<Vec<usize>>);
 
 impl LatinSquare {
@@ -941,8 +942,29 @@ impl LatinSquare {
         result
     }
 
-    fn apply_permutation(&mut self, p: &Permutation) {
-        todo!()
+    fn apply_permutation(&mut self, mut p: Permutation) {
+
+        for row in self.0.iter_mut() {
+            for column in row.iter_mut() {
+                *column = p.0[*column]
+            }
+        }
+
+        let length = p.0.len();
+
+        for i in 0..length {
+            let j = p.0.iter().position(|&x| x == i).unwrap();
+
+            if i != j {
+                self.0.swap(i, j);
+
+                for row in self.0.iter_mut() {
+                    row.swap(i, j)
+                }
+
+                p.0.swap(i, j);
+            }
+        }
     }
 
     fn classify(&self) -> LatinStructure {      
@@ -1013,29 +1035,90 @@ impl LatinSquare {
     }
 }
 
-fn main() {
-    println!("Hello, world!");
+fn try_class_preserved_after_conjugacy(n: usize) {
 
-    let squares = LatinSquare::generate_all(5);
+    let squares = LatinSquare::generate_all(n);
 
-    let mut classifications: [usize; 4] = [0; 4];
+    let mut classifications: (Vec<LatinSquare>, Vec<LatinSquare>, Vec<LatinSquare>, Vec<LatinSquare>) = (vec![], vec![], vec![], vec![]);
 
     for s in &squares {
 
         let c = s.classify();
 
         match c {
-            LatinStructure::Quasigroup => classifications[0] += 1,
-            LatinStructure::Loop => classifications[1] += 1,
-            LatinStructure::Group => classifications[2] += 1,
-            LatinStructure::Abelian => classifications[3] += 1,
+            LatinStructure::Quasigroup => classifications.0.push(s.clone()),
+            LatinStructure::Loop => classifications.1.push(s.clone()),
+            LatinStructure::Group => classifications.2.push(s.clone()),
+            LatinStructure::Abelian => classifications.3.push(s.clone()),
         }
 
-        // println!("{:?}", c);
-        // s.print()
     }
-    println!("{}", squares.len());
-    println!("{:?}", classifications);
+
+    let (q, l, g, a) = classifications;
+
+    // println!("Total amount of latin squares: {}", squares.len());
+    // println!("Quasigroups: {}, Loops: {}, Groups: {}, Abelian: {}", q.len(), l.len(), g.len(), a.len());
+
+    let perms = Permutation::generate_all(n);
+
+    let bar = ProgressBar::new(factorial(n) as u64);
+
+    for p in perms {
+        bar.inc(1);
+        for s in q.iter() {
+
+            let mut test = s.clone();
+
+            test.apply_permutation(p.clone());
+
+            if test.classify() != LatinStructure::Quasigroup {
+                println!("q FAILED!");
+                panic!();
+            }
+
+        }
+
+        for s in l.iter() {
+
+            let mut test = s.clone();
+
+            test.apply_permutation(p.clone());
+
+            if test.classify() != LatinStructure::Loop {
+                println!("l FAILED!");
+                panic!();
+            }
+        }
+
+        for s in g.iter() {
+
+            let mut test = s.clone();
+
+            test.apply_permutation(p.clone());
+
+            if test.classify() != LatinStructure::Group {
+                println!("g FAILED!");
+                panic!();
+            }
+        }
+
+        for s in a.iter() {
+
+            let mut test = s.clone();
+
+            test.apply_permutation(p.clone());
+
+            if test.classify() != LatinStructure::Abelian {
+                println!("a FAILED!");
+                panic!();
+            }
+        }
+    }
+}
+
+fn main() {
+    println!("Hello, world!");
+
 }
 
 #[cfg(test)]
