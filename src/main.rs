@@ -799,11 +799,243 @@ fn try_permutations_equal_in_isomorphism_class(n: usize) {
     println!("{}", working_permutations.len(),);
 }
 
+// x -> p[x] is a permutation.
+struct Permutation(Vec<usize>);
+
+impl Permutation {
+    fn generate_all(n: usize) -> Vec<Permutation> {
+        let mut perms = generate_all_permutations(n);
+        let mut result: Vec<Permutation> = vec![];
+        for p in perms.drain(..) {
+            result.push(Permutation(p));
+        }
+        result
+    }
+
+    fn print(&self) {
+
+    }
+}
+
+#[derive(Clone)]
+struct PartialLatinSquare(Vec<Vec<usize>>);
+
+// impl PartialLatinSquare {
+//     fn is_n_by_n_latin_square(&self, n: usize) -> bool {
+//         self.0.len() == n && self.0.last().unwrap().len() == n
+//     }
+// }
+
+
+// May run faster if split up the cases where col = n or not?
+fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSquare> {
+    let mut result: Vec<LatinSquare> = vec![];
+
+    let last = partial.0.last().unwrap();
+
+    let mut col = last.len();
+    let mut row = partial.0.len() - 1;
+
+    if col == n {
+        col = 0;
+        row += 1;
+    }
+
+    'val: for i in 0..n {
+
+        // Check if i exists on current row.
+        if let Some(l) = partial.0.get(row) {
+            if l.contains(&i) {
+                continue 'val;
+            }
+        }
+
+        // Check if i exist on column
+        for r in partial.0.iter().take(row) {
+            if r[col] == i {
+                continue 'val;
+            }
+        }
+
+        // Clone the vector or the partial-latin square?
+        let mut p = partial.0.clone();
+
+        if col == 0 {
+            p.push(vec![i]);
+        } else {
+            p.last_mut().unwrap().push(i);
+
+            if row == n - 1 && col == n - 1 {
+                return vec![LatinSquare(p)];
+            }
+        }
+
+        let p = PartialLatinSquare(p);
+
+        result.append(&mut latin_square_recursion(n, p));
+    }
+
+    result
+}
+
+#[derive(Debug)]
+enum LatinStructure {
+    Quasigroup,
+    Loop,
+    Group,
+    Abelian,
+}
+
+// Represented as a vector of the rows of the latin square, where the rows are vectors of usize.
+#[derive(Debug)]
+struct LatinSquare(Vec<Vec<usize>>);
+
+impl LatinSquare {
+    fn print(&self) {
+        let length = self.0.len();
+
+        let n = length * 3 + 3;
+        let border = "-".repeat(n);
+
+        let newline = "\n";
+
+        let mut super_string: String = "".to_string();
+
+        super_string.push_str(&border);
+        super_string.push_str(newline);
+
+        for row in 0..length {
+            let mut string = "|".to_string();
+            for column in 0..length {
+                let val = self.0[row][column];
+                if val < 10 {
+                    string.push_str("  ");
+                    string.push_str(&val.to_string());
+                } else {
+                    string.push(' ');
+                    string.push_str(&val.to_string());
+                }
+            }
+            string.push_str(" |");
+
+            super_string.push_str(&string);
+            super_string.push_str(newline);
+        }
+        super_string.push_str(&border);
+        
+        println!("{}", super_string)
+        }
+
+    fn generate_all(n: usize) -> Vec<LatinSquare> {
+        let mut result: Vec<LatinSquare> = vec![];
+        let bar = ProgressBar::new(n as u64);
+
+        for i in 0..n {
+            bar.inc(1);
+            result.append(&mut latin_square_recursion(
+                n,
+                PartialLatinSquare(vec![vec![i]]),
+            ));
+        }
+
+        result
+    }
+
+    fn apply_permutation(&mut self, p: &Permutation) {
+        todo!()
+    }
+
+    fn classify(&self) -> LatinStructure {      
+
+        // Check if it contains a right-identity 
+        let mut standard: Vec<usize> = (0..self.0.len()).collect();
+
+        if !self.0.contains(&standard) {
+            return LatinStructure::Quasigroup;
+        }
+
+        // Check if it contains a left-identity
+        let column = self.0[0].iter().position(|&x| x == 0).unwrap();
+
+        for row in self.0.iter().rev() {
+            let c = standard.pop().unwrap();
+
+            if c != row[column] {
+                return LatinStructure::Quasigroup;
+            } 
+        }
+
+        // Check if associative
+
+        let a: Vec<usize>;
+
+        if column == 0 {
+            a = (1..self.0.len()).collect()
+        } else if column == self.0.len() - 1 {
+            a = (0..(self.0.len() - 1)).collect()
+        } else {
+            let mut a_1: Vec<usize> = (0..column).collect();
+            a_1.append(&mut ((column + 1)..self.0.len()).collect());
+
+            a = a_1;
+        };
+
+        let mut associativity_triplets: Vec<(usize, usize, usize)> = vec![];
+
+        for x in &a {
+            for y in &a {
+                for z in &a {
+                    associativity_triplets.push((*x, *y, *z));
+                }
+            }
+        }
+
+        for (a, b, c) in associativity_triplets {
+            let left = self.0[a][self.0[b][c]];
+            let right = self.0[self.0[a][b]][c];
+
+            if left != right {
+                return LatinStructure::Loop;
+            }
+        }
+
+        // Check if symmetric
+
+        for a in 1..self.0.len() {
+            for b in 0..a {
+                if self.0[a][b] != self.0[b][a] {
+                    return LatinStructure::Group;
+                }
+            }
+        }
+
+        LatinStructure::Abelian
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 
-    try_permutations_equal_in_isomorphism_class(4);
-    try_permutation_gives_automorphism(4);
+    let squares = LatinSquare::generate_all(5);
+
+    let mut classifications: [usize; 4] = [0; 4];
+
+    for s in &squares {
+
+        let c = s.classify();
+
+        match c {
+            LatinStructure::Quasigroup => classifications[0] += 1,
+            LatinStructure::Loop => classifications[1] += 1,
+            LatinStructure::Group => classifications[2] += 1,
+            LatinStructure::Abelian => classifications[3] += 1,
+        }
+
+        // println!("{:?}", c);
+        // s.print()
+    }
+    println!("{}", squares.len());
+    println!("{:?}", classifications);
 }
 
 #[cfg(test)]
