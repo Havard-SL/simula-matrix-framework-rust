@@ -1107,8 +1107,92 @@ fn try_class_preserved_after_conjugacy(n: usize) {
     }
 }
 
+fn generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
+    let mut text: String = "".to_string();
+
+    let mut previous: Option<usize>;
+
+    for row in rows {
+
+        let mut work: String = "|".to_string();
+        previous = None;
+
+        for column in row {
+            if let Some(v) = previous {
+                work.push_str(&" |".repeat(column - v - 1));
+            }
+            previous = Some(column);
+            work.push_str("x|");
+        }
+
+        work.push_str(&" |".repeat(length - 1 - previous.unwrap()));
+        work.push('\n');
+
+        text.push_str(&work);
+    }
+
+    text
+}
+
+fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
+    let mut text: String = "\\begin{tabular}[".to_string();
+    text.push_str(&"| c ".repeat(length + 1));
+    text.push_str("|] \\hline\n");
+
+    let mut previous: Option<usize>;
+
+    for row in rows {
+
+        let mut work: String = "".to_string();
+        previous = None;
+
+        for column in row {
+            if let Some(v) = previous {
+                work.push_str(&" &".repeat(column - v - 1));
+            }
+            previous = Some(column);
+            work.push_str(" x &");
+        }
+
+        work.push_str(&" &".repeat(length - 1 - previous.unwrap()));
+        work.push_str("\\\\ \\hline \n");
+
+        text.push_str(&work);
+    }
+    text.push_str("\\end{tabular}");
+
+    text
+}
+
 fn main() {
     println!("Hello, world!");
+
+    let n = 3;
+
+    let squares = LatinSquare::generate_all(n);
+
+    let perms = Permutation::generate_all(n);
+
+    let mut automorphisms_for_groups: Vec<Vec<usize>> = vec![];
+
+    for s in squares.iter() {
+        let mut row: Vec<usize> = vec![];
+
+        for (i, p) in perms.iter().enumerate() {
+            let mut w = s.clone();
+            w.apply_permutation(p.clone());
+
+            if w == *s {
+                row.push(i)
+            }
+        }
+        automorphisms_for_groups.push(row);
+    }
+
+    let text = latex_generate_cross_table(automorphisms_for_groups, perms.len());
+
+    println!("{}", text);
+
 }
 
 #[cfg(test)]
