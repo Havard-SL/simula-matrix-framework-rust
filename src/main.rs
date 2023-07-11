@@ -1116,7 +1116,7 @@ fn try_class_preserved_after_conjugacy(n: usize) {
 }
 
 // Generate a basic text table from a "sparce" boolean table.
-fn generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
+fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
     let mut text: String = "".to_string();
 
     let mut previous: Option<usize>;
@@ -1129,7 +1129,7 @@ fn generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
             if let Some(v) = previous {
                 work.push_str(&" |".repeat(column - v - 1));
             }
-            previous = Some(column);
+            previous = Some(*column);
             work.push_str("x|");
         }
 
@@ -1142,8 +1142,52 @@ fn generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
     text
 }
 
+fn latex_matrix(rows: &LatinSquare) -> String {
+
+    let mut text: String = "\\( \\begin{matrix}\n".to_string();
+
+    for row in &rows.0 {
+        text.push_str("    ");
+        text.push_str(&row[0].to_string());
+        for r in row.iter().skip(1) {
+            text.push_str(" & ");
+            text.push_str(&r.to_string());
+        }
+        text.push_str(" \\\\\n")
+    }
+    text.push_str("\\end{matrix} \\)\n");
+
+    text
+}
+
+fn latex_permutation(rows: &Permutation) -> String {
+    let mut text: String = "\\( \\begin{matrix}\n".to_string();
+
+    text.push_str("    ");
+    text.push_str(&0.to_string());
+    for r in 1..rows.0.len() {
+        text.push_str(" & ");
+        text.push_str(&r.to_string());
+    }
+    text.push_str(" \\\\\n");
+
+    text.push_str("    ");
+
+    text.push_str(&rows.0[0].to_string());
+    for r in rows.0.iter().skip(1) {
+        text.push_str(" & ");
+        text.push_str(&r.to_string());
+    }
+
+    text.push_str(" \\\\\n");
+
+    text.push_str("\\end{matrix} \\)\n");
+
+    text
+}
+
 // Generate a latex table from a "sparce" boolean table.
-fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
+fn latex_generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
     let mut text: String = "\\begin{tabular}{".to_string();
     text.push_str(&"| c ".repeat(length));
     text.push_str("|} \\hline\n");
@@ -1158,8 +1202,66 @@ fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
             if let Some(v) = previous {
                 work.push_str(&"   &".repeat(column - v - 1));
             }
-            previous = Some(column);
-            if column != length - 1 {
+            previous = Some(*column);
+            if *column != length - 1 {
+                work.push_str(" x &");
+            } else {
+                work.push_str(" x");
+            }
+        }
+        if previous.unwrap() != length - 1 {
+            work.push_str(&"   &".repeat(length - 2 - previous.unwrap()));
+            work.push_str("  ");
+        }
+        work.push_str(" \\\\ \\hline\n");
+
+        text.push_str(&work);
+    }
+    text.push_str("\\end{tabular}");
+
+    text
+}
+
+fn latex_generate_fancy_cross_table(rows: &[Vec<usize>], length: usize, squares: Vec<LatinSquare>, perms: Vec<Permutation>) -> String {
+    let mut text: String = "\\begin{tabular}{".to_string();
+    text.push_str(&"| c ".repeat(length + 2));
+    text.push_str("|} \\hline\n");
+
+    let mut previous: Option<usize>;
+
+    text.push_str(" Class & Latin Square");
+
+    for p in &perms {
+        text.push_str("& ");
+        text.push_str(&latex_permutation(p))
+    }
+    text.push_str(" \\\\ \\hline");
+
+    for (i, row) in rows.iter().enumerate() {
+        let mut work: String = "    ".to_string();
+
+        let class = match squares[i].classify() {
+            LatinStructure::Quasigroup => "Quasigroup",
+            LatinStructure::Loop => "Loop",
+            LatinStructure::Group => "Group",
+            LatinStructure::Abelian => "Abelian",
+        };
+
+        work.push_str(class);
+        work.push_str(" &\n");
+
+        work.push_str(&latex_matrix(&squares[i]));
+
+        work.push_str(" & ");
+
+        previous = None;
+
+        for column in row {
+            if let Some(v) = previous {
+                work.push_str(&"   &".repeat(column - v - 1));
+            }
+            previous = Some(*column);
+            if *column != length - 1 {
                 work.push_str(" x &");
             } else {
                 work.push_str(" x");
@@ -1222,16 +1324,7 @@ fn try_automorphism_groups_porperties(
     }
 }
 
-fn main() {
-    // Set the dimension of the Latin squares i generate.
-    let n = 3;
-
-    // Generate all the n by n latin squares.
-    let squares = LatinSquare::generate_all(n);
-
-    // Generate all the permutations on n elements.
-    let perms = Permutation::generate_all(n);
-
+fn generate_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) -> Vec<Vec<usize>> {
     let mut automorphisms_given_group: Vec<Vec<usize>> = vec![];
 
     // Iterate over every latin square.
@@ -1253,16 +1346,26 @@ fn main() {
         automorphisms_given_group.push(row);
     }
 
-    // try_automorphism_groups_porperties(automorphisms_given_group, squares, perms);
-
-    // Generate the table based on the result found above.
-    let text = generate_cross_table(automorphisms_given_group, perms.len());
-
-    // let text = latex_generate_cross_table(automorphisms_given_group, perms.len());
-
-    println!("{}", text);
+    automorphisms_given_group
 }
 
+fn main() {
+    // Set the dimension of the Latin squares i generate.
+    let n = 4;
+
+    // Generate all the n by n latin squares.
+    let squares = LatinSquare::generate_all(n);
+
+    // Generate all the permutations on n elements.
+    let perms = Permutation::generate_all(n);
+
+    let g = generate_automorphism_table(&squares, &perms);
+
+    try_automorphism_groups_porperties(g, squares, perms);
+}
+
+// Unit tests.
+// Not currently being used.
 #[cfg(test)]
 mod tests {
     use super::*;
