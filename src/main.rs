@@ -1324,6 +1324,8 @@ fn try_automorphism_groups_porperties(
     }
 }
 
+// Takes a vec of latin squares, and a vec of permutations and creates the sparse bool table
+// where a permutation is an automorphism for a latin square.
 fn generate_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) -> Vec<Vec<usize>> {
     let mut automorphisms_given_group: Vec<Vec<usize>> = vec![];
 
