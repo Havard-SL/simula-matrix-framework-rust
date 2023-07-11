@@ -799,11 +799,14 @@ fn try_permutations_equal_in_isomorphism_class(n: usize) {
     println!("{}", working_permutations.len(),);
 }
 
-// x -> p[x] is a permutation.
+// ABOVE IS LEGACY CODE
+
+// Permutation on the form: x -> p[x] is a permutation.
 #[derive(Debug, Clone, PartialEq)]
 struct Permutation(Vec<usize>);
 
 impl Permutation {
+    // Generates all permutations.
     fn generate_all(n: usize) -> Vec<Permutation> {
         let mut perms = generate_all_permutations(n);
         let mut result: Vec<Permutation> = vec![];
@@ -819,13 +822,9 @@ impl Permutation {
 #[derive(Debug, Clone, PartialEq)]
 struct PartialLatinSquare(Vec<Vec<usize>>);
 
-// impl PartialLatinSquare {
-//     fn is_n_by_n_latin_square(&self, n: usize) -> bool {
-//         self.0.len() == n && self.0.last().unwrap().len() == n
-//     }
-// }
-
-// May run faster if split up the cases where col = n or not?
+// Takes a partial latin square, and recursively creates the next partial latin squares,
+// until there are only full latin squares left.
+// TODO: May run faster if split up the cases where col = n or not?
 fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSquare> {
     let mut result: Vec<LatinSquare> = vec![];
 
@@ -847,14 +846,14 @@ fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSqu
             }
         }
 
-        // Check if i exist on column
+        // Check if i exist on column.
         for r in partial.0.iter().take(row) {
             if r[col] == i {
                 continue 'val;
             }
         }
 
-        // Clone the vector or the partial-latin square?
+        // Add i to the partial latin square.
         let mut p = partial.0.clone();
 
         if col == 0 {
@@ -869,12 +868,14 @@ fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSqu
 
         let p = PartialLatinSquare(p);
 
+        // Recursive call.
         result.append(&mut latin_square_recursion(n, p));
     }
 
     result
 }
 
+// The different classes that a latin square can belong to.
 #[derive(Debug, Clone, PartialEq)]
 enum LatinStructure {
     Quasigroup,
@@ -884,10 +885,12 @@ enum LatinStructure {
 }
 
 // Represented as a vector of the rows of the latin square, where the rows are vectors of usize.
+// Always non-empty, square, and satisfies the latin square property.
 #[derive(Debug, Clone, PartialEq)]
 struct LatinSquare(Vec<Vec<usize>>);
 
 impl LatinSquare {
+    // Prints the Latin square in a pretty way.
     fn print(&self) {
         let length = self.0.len();
 
@@ -923,6 +926,7 @@ impl LatinSquare {
         println!("{}", super_string)
     }
 
+    // Generates all latin squares. No fixed identity.
     fn generate_all(n: usize) -> Vec<LatinSquare> {
         let mut result: Vec<LatinSquare> = vec![];
         let bar = ProgressBar::new(n as u64);
@@ -938,13 +942,17 @@ impl LatinSquare {
         result
     }
 
+    // Applies a permutation to a latin square. I.e. gives the conjugacy of the latin square.
     fn apply_permutation(&mut self, mut p: Permutation) {
+        // Apply the permutation to every element in the latin square.
         for row in self.0.iter_mut() {
             for column in row.iter_mut() {
                 *column = p.0[*column]
             }
         }
 
+        // Permutes the rows and columns of the latin square by the inverse of the permutation
+        // in a pairwise way, by turning the permutation into transmutations.
         let length = p.0.len();
 
         for i in 0..length {
@@ -962,6 +970,7 @@ impl LatinSquare {
         }
     }
 
+    // Classifies the Latin square as a quasigroup, loop, group or abelian group.
     fn classify(&self) -> LatinStructure {
         // Check if it contains a right-identity
         let mut standard: Vec<usize> = (0..self.0.len()).collect();
@@ -982,7 +991,6 @@ impl LatinSquare {
         }
 
         // Check if associative
-
         let a: Vec<usize>;
 
         if column == 0 {
@@ -1016,7 +1024,6 @@ impl LatinSquare {
         }
 
         // Check if symmetric
-
         for a in 1..self.0.len() {
             for b in 0..a {
                 if self.0[a][b] != self.0[b][a] {
@@ -1029,6 +1036,7 @@ impl LatinSquare {
     }
 }
 
+// Checks if the class is exactly preserved under conjugacy.
 fn try_class_preserved_after_conjugacy(n: usize) {
     let squares = LatinSquare::generate_all(n);
 
@@ -1107,13 +1115,13 @@ fn try_class_preserved_after_conjugacy(n: usize) {
     }
 }
 
+// Generate a basic text table from a "sparce" boolean table.
 fn generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
     let mut text: String = "".to_string();
 
     let mut previous: Option<usize>;
 
     for row in rows {
-
         let mut work: String = "|".to_string();
         previous = None;
 
@@ -1134,6 +1142,7 @@ fn generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
     text
 }
 
+// Generate a latex table from a "sparce" boolean table.
 fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
     let mut text: String = "\\begin{tabular}{".to_string();
     text.push_str(&"| c ".repeat(length));
@@ -1142,7 +1151,6 @@ fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
     let mut previous: Option<usize>;
 
     for row in rows {
-
         let mut work: String = "    ".to_string();
         previous = None;
 
@@ -1156,7 +1164,6 @@ fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
             } else {
                 work.push_str(" x");
             }
-            
         }
         if previous.unwrap() != length - 1 {
             work.push_str(&"   &".repeat(length - 2 - previous.unwrap()));
@@ -1171,9 +1178,14 @@ fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
     text
 }
 
-fn try_automorphism_groups_porperties(automorphisms_given_group: Vec<Vec<usize>>, squares: Vec<LatinSquare>, perms: Vec<Permutation>) {
+// Check and print if there are any permutations that are not an automorphism for any latin square.
+// Check and print if there are any latin squares that only has the identity as an automorphism.
+fn try_automorphism_groups_porperties(
+    automorphisms_given_group: Vec<Vec<usize>>,
+    squares: Vec<LatinSquare>,
+    perms: Vec<Permutation>,
+) {
     let mut j: usize = 0;
-
 
     'i: for (i, p) in perms.iter().enumerate() {
         for row in &automorphisms_given_group {
@@ -1211,21 +1223,29 @@ fn try_automorphism_groups_porperties(automorphisms_given_group: Vec<Vec<usize>>
 }
 
 fn main() {
-    let n = 5;
+    // Set the dimension of the Latin squares i generate.
+    let n = 3;
 
+    // Generate all the n by n latin squares.
     let squares = LatinSquare::generate_all(n);
 
+    // Generate all the permutations on n elements.
     let perms = Permutation::generate_all(n);
 
     let mut automorphisms_given_group: Vec<Vec<usize>> = vec![];
 
+    // Iterate over every latin square.
     for s in squares.iter() {
         let mut row: Vec<usize> = vec![];
 
+        // Iterate over every permutation
         for (i, p) in perms.iter().enumerate() {
             let mut w = s.clone();
+
+            // Apply the permutation to the latin square.
             w.apply_permutation(p.clone());
 
+            // If the resulting latin square is equal to the starting latin square, then add the (index of the) permutation as an automorphism for that latin square.
             if w == *s {
                 row.push(i)
             }
@@ -1233,12 +1253,14 @@ fn main() {
         automorphisms_given_group.push(row);
     }
 
-    try_automorphism_groups_porperties(automorphisms_given_group, squares, perms);
+    // try_automorphism_groups_porperties(automorphisms_given_group, squares, perms);
 
-    // let text = latex_generate_cross_table(automorphisms_for_groups, perms.len());
+    // Generate the table based on the result found above.
+    let text = generate_cross_table(automorphisms_given_group, perms.len());
 
-    // println!("{}", text);
+    // let text = latex_generate_cross_table(automorphisms_given_group, perms.len());
 
+    println!("{}", text);
 }
 
 #[cfg(test)]
