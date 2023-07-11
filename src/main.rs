@@ -1135,27 +1135,34 @@ fn generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
 }
 
 fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
-    let mut text: String = "\\begin{tabular}[".to_string();
-    text.push_str(&"| c ".repeat(length + 1));
-    text.push_str("|] \\hline\n");
+    let mut text: String = "\\begin{tabular}{".to_string();
+    text.push_str(&"| c ".repeat(length));
+    text.push_str("|} \\hline\n");
 
     let mut previous: Option<usize>;
 
     for row in rows {
 
-        let mut work: String = "".to_string();
+        let mut work: String = "    ".to_string();
         previous = None;
 
         for column in row {
             if let Some(v) = previous {
-                work.push_str(&" &".repeat(column - v - 1));
+                work.push_str(&"   &".repeat(column - v - 1));
             }
             previous = Some(column);
-            work.push_str(" x &");
+            if column != length - 1 {
+                work.push_str(" x &");
+            } else {
+                work.push_str(" x");
+            }
+            
         }
-
-        work.push_str(&" &".repeat(length - 1 - previous.unwrap()));
-        work.push_str("\\\\ \\hline \n");
+        if previous.unwrap() != length - 1 {
+            work.push_str(&"   &".repeat(length - 2 - previous.unwrap()));
+            work.push_str("  ");
+        }
+        work.push_str(" \\\\ \\hline\n");
 
         text.push_str(&work);
     }
@@ -1164,16 +1171,53 @@ fn latex_generate_cross_table(rows: Vec<Vec<usize>>, length: usize) -> String {
     text
 }
 
-fn main() {
-    println!("Hello, world!");
+fn try_automorphism_groups_porperties(automorphisms_given_group: Vec<Vec<usize>>, squares: Vec<LatinSquare>, perms: Vec<Permutation>) {
+    let mut j: usize = 0;
 
-    let n = 3;
+
+    'i: for (i, p) in perms.iter().enumerate() {
+        for row in &automorphisms_given_group {
+            if row.binary_search(&i).is_ok() {
+                continue 'i;
+            }
+        }
+
+        j += 1;
+
+        println!("Permutation number {i}, {:?} is no automorphism.", p);
+
+        if j == 10 {
+            println!("Too many permutations, stopped.");
+            break;
+        }
+    }
+
+    let mut j: usize = 0;
+
+    for (i, row) in automorphisms_given_group.iter().enumerate() {
+        if row == &vec![0] {
+            println!("Square number {i}: ");
+            squares[i].print();
+            println!("Has only trivial automorphisms.");
+
+            j += 1;
+
+            if j == 10 {
+                println!("Too many squares, stopped.");
+                break;
+            }
+        }
+    }
+}
+
+fn main() {
+    let n = 5;
 
     let squares = LatinSquare::generate_all(n);
 
     let perms = Permutation::generate_all(n);
 
-    let mut automorphisms_for_groups: Vec<Vec<usize>> = vec![];
+    let mut automorphisms_given_group: Vec<Vec<usize>> = vec![];
 
     for s in squares.iter() {
         let mut row: Vec<usize> = vec![];
@@ -1186,12 +1230,14 @@ fn main() {
                 row.push(i)
             }
         }
-        automorphisms_for_groups.push(row);
+        automorphisms_given_group.push(row);
     }
 
-    let text = latex_generate_cross_table(automorphisms_for_groups, perms.len());
+    try_automorphism_groups_porperties(automorphisms_given_group, squares, perms);
 
-    println!("{}", text);
+    // let text = latex_generate_cross_table(automorphisms_for_groups, perms.len());
+
+    // println!("{}", text);
 
 }
 
