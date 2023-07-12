@@ -1144,7 +1144,7 @@ fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
 
 fn latex_matrix(rows: &LatinSquare) -> String {
 
-    let mut text: String = "\\( \\begin{matrix}\n".to_string();
+    let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
 
     for row in &rows.0 {
         text.push_str("    ");
@@ -1155,13 +1155,13 @@ fn latex_matrix(rows: &LatinSquare) -> String {
         }
         text.push_str(" \\\\\n")
     }
-    text.push_str("\\end{matrix} \\)\n");
+    text.push_str("\\end{smallmatrix} \\)\n");
 
     text
 }
 
 fn latex_permutation(rows: &Permutation) -> String {
-    let mut text: String = "\\( \\begin{matrix}\n".to_string();
+    let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
 
     text.push_str("    ");
     text.push_str(&0.to_string());
@@ -1181,7 +1181,7 @@ fn latex_permutation(rows: &Permutation) -> String {
 
     text.push_str(" \\\\\n");
 
-    text.push_str("\\end{matrix} \\)\n");
+    text.push_str("\\end{smallmatrix} \\)\n");
 
     text
 }
@@ -1223,7 +1223,7 @@ fn latex_generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
 }
 
 fn latex_generate_fancy_cross_table(rows: &[Vec<usize>], length: usize, squares: Vec<LatinSquare>, perms: Vec<Permutation>) -> String {
-    let mut text: String = "\\begin{tabular}{".to_string();
+    let mut text: String = "\\begin{longtable}{".to_string();
     text.push_str(&"| c ".repeat(length + 2));
     text.push_str("|} \\hline\n");
 
@@ -1235,19 +1235,24 @@ fn latex_generate_fancy_cross_table(rows: &[Vec<usize>], length: usize, squares:
         text.push_str("& ");
         text.push_str(&latex_permutation(p))
     }
-    text.push_str(" \\\\ \\hline");
+    text.push_str(" \\\\ \\hline\n\\endhead\n");
 
     for (i, row) in rows.iter().enumerate() {
         let mut work: String = "    ".to_string();
 
         let class = match squares[i].classify() {
             LatinStructure::Quasigroup => "Quasigroup",
-            LatinStructure::Loop => "Loop",
+            LatinStructure::Loop => "\\rowcolor{lime} Loop",
             LatinStructure::Group => "Group",
-            LatinStructure::Abelian => "Abelian",
+            LatinStructure::Abelian => "\\rowcolor{cyan} Abelian",
         };
 
         work.push_str(class);
+
+        // if row == &vec![0] {
+        //     work.push_str(" \\rowcolor{gray} ");
+        // }
+
         work.push_str(" &\n");
 
         work.push_str(&latex_matrix(&squares[i]));
@@ -1262,9 +1267,9 @@ fn latex_generate_fancy_cross_table(rows: &[Vec<usize>], length: usize, squares:
             }
             previous = Some(*column);
             if *column != length - 1 {
-                work.push_str(" x &");
+                work.push_str(" \\cellcolor[HTML]{AA0044} x &");
             } else {
-                work.push_str(" x");
+                work.push_str(" \\cellcolor[HTML]{AA0044} x");
             }
         }
         if previous.unwrap() != length - 1 {
@@ -1275,7 +1280,7 @@ fn latex_generate_fancy_cross_table(rows: &[Vec<usize>], length: usize, squares:
 
         text.push_str(&work);
     }
-    text.push_str("\\end{tabular}");
+    text.push_str("\\end{longtable}");
 
     text
 }
@@ -1353,7 +1358,7 @@ fn generate_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) -
 
 fn main() {
     // Set the dimension of the Latin squares i generate.
-    let n = 4;
+    let n = 3;
 
     // Generate all the n by n latin squares.
     let squares = LatinSquare::generate_all(n);
@@ -1363,7 +1368,9 @@ fn main() {
 
     let g = generate_automorphism_table(&squares, &perms);
 
-    try_automorphism_groups_porperties(g, squares, perms);
+    let t = latex_generate_fancy_cross_table(&g, perms.len(), squares, perms);
+
+    println!("{}", t);
 }
 
 // Unit tests.
