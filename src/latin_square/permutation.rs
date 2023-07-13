@@ -35,6 +35,16 @@ impl Permutation {
         result
     }
 
+    pub fn compose(&self, inner: &Permutation) -> Permutation {
+        let mut result: Vec<usize> = vec![];
+        
+        for i in 0..self.0.len() {
+            result.push(self.0[inner.0[i]]);
+        }
+
+        Permutation(result)
+    }
+
     pub fn print(&self) {
         todo!()
     }

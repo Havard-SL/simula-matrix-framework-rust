@@ -3,6 +3,10 @@ use indicatif::ProgressBar;
 pub mod permutation;
 pub use permutation::Permutation;
 
+pub use self::sidedness::Sidedness;
+
+pub mod sidedness;
+
 #[derive(Debug, Clone, PartialEq)]
 struct PartialLatinSquare(Vec<Vec<usize>>);
 
@@ -217,5 +221,19 @@ impl LatinSquare {
         }
 
         LatinStructure::Abelian
+    }
+
+    pub fn addition_permutation(&self, v: usize, side: &Sidedness) -> Permutation {
+        let mut result: Vec<usize> = vec![];
+        
+        for i in 0..self.0.len() {
+            let r = match side {
+                Sidedness::Left => self.0[v][i],
+                Sidedness::Right => self.0[i][v],
+            };
+            result.push(r);
+        }
+
+        Permutation(result)
     }
 }

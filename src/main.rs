@@ -6,6 +6,8 @@ mod latin_square;
 use latin_square::LatinSquare;
 use latin_square::LatinStructure;
 use latin_square::Permutation;
+use latin_square::Sidedness;
+use latin_square::sidedness;
 
 mod abelian;
 
@@ -252,6 +254,171 @@ fn generate_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) -
     automorphisms_given_group
 }
 
+type AffineAutomorphism = (usize, usize, Sidedness);
+type AllAffineAutomorphisms = (bool, Vec<AffineAutomorphism>);
+type LatinSquareClassification = (usize, LatinStructure, Vec<AllAffineAutomorphisms>);
+
+fn generate_cross_table_2(table: &[LatinSquareClassification]) -> String {
+    let mut text = "".to_string();
+
+    let mut border = "-".repeat((table[0].2.len() + 2)*14+ 1);
+    border.push('\n');
+
+
+    text.push_str(&border);
+
+    text.push_str(&"|             ".repeat(2));
+    text.push('|');
+
+    for i in 0..table[0].2.len() {
+        text.push_str("     p_");
+        text.push_str(&i.to_string());
+        if i < 10 {
+            text.push_str("     |");
+        } else {
+            text.push_str("    |");
+        }
+    }
+    text.push('\n');
+    text.push_str(&border);
+    
+    for r in table.iter() {
+
+        let mut height = 1;
+
+        for p in &r.2 {
+            let mut working_height = 1;
+
+            working_height += p.1.len();
+
+            if working_height > height {
+                height = working_height;
+            }
+        }
+
+        text.push_str("|     s_");
+        text.push_str(&r.0.to_string());
+
+        if r.0 < 10 {
+            text.push_str("     |");
+        } else {
+            text.push_str("    |");
+        }
+
+        let t = match r.1 {
+            LatinStructure::Quasigroup => " Quasigroup  |",
+            LatinStructure::Loop => " Loop        |",
+            LatinStructure::Group => " Group       |",
+            LatinStructure::Abelian => " Abelian     |",
+        };
+
+        text.push_str(t);
+
+        for w in &r.2 {
+            if w.0 {
+                text.push_str("      x");
+            } else {
+                text.push_str("       ");
+            }
+            text.push_str("      |");
+        }
+        text.push('\n');
+        
+        for i in 0..(height - 1) {
+            text.push_str("|             |             |");
+            for w in &r.2 {
+                if let Some(x) = w.1.get(i) {
+                    text.push_str("  ");
+                    match x.2 {
+                        Sidedness::Left => {
+                            if x.1 < 10 {
+                                text.push(' ');
+                            }
+                            text.push_str(&x.1.to_string());
+                            text.push_str(" + p_");
+                            text.push_str(&x.0.to_string());
+                            if x.0 < 10 {
+                                text.push(' ');
+                            }
+                        }
+                        Sidedness::Right => {
+                            if x.0 < 10 {
+                                text.push(' ');
+                            }
+                            text.push_str("p_");
+                            text.push_str(&x.0.to_string());
+                            text.push_str(" + ");
+                            text.push_str(&x.1.to_string());
+                            if x.1 < 10 {
+                                text.push(' ');
+                            }
+                        }
+                    };
+                    text.push_str("  |")
+                } else {
+                    text.push_str("             |")
+                }
+            }
+            text.push('\n');
+        }
+        text.push_str(&border);
+    }
+
+    text
+}
+
+fn calculate_fingerprint(classification: &LatinSquareClassification) -> usize {
+
+    let mut fingerprint: usize = match classification.1 {
+        LatinStructure::Quasigroup => 3,
+        LatinStructure::Loop => 2,
+        LatinStructure::Group => 1,
+        LatinStructure::Abelian => 0,    
+    };
+
+    for (i, c) in classification.2.iter().enumerate() {
+        if c.0 {
+            fingerprint += 2_usize.pow((i + 2).try_into().unwrap());
+        }
+    }
+
+    fingerprint
+}
+
+fn print_affine_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) {
+    let mut result: Vec<LatinSquareClassification> = vec![];
+
+    for (j, s) in squares.iter().enumerate() {
+        let mut row: LatinSquareClassification = (j, s.classify(), vec![(false, vec![]); perms.len()]);
+
+        for (i, p) in perms.iter().enumerate() {
+            let mut w = s.clone();
+            w.apply_permutation(p.clone());
+
+            if w == *s {
+
+                row.2[i].0 = true;
+                for v in 0..squares[0].0.len() {
+
+                    for side in sidedness::SIDES {
+                        let affine_automorphism = s.addition_permutation(v, &side).compose(p);
+                        let found_permutation = perms.iter().position(|x| x == &affine_automorphism).unwrap();
+                        row.2[found_permutation].1.push((i, v, side));
+                    }
+                }
+            }
+        }
+
+        result.push(row);
+    }
+
+    result.sort_by_cached_key(calculate_fingerprint);
+
+    let text = generate_cross_table_2(&result);
+
+    println!("{}", &text);
+}
+
 fn main() {
     // Set the dimension of the Latin squares i generate.
     let n = 3;
@@ -262,9 +429,5 @@ fn main() {
     // Generate all the permutations on n elements.
     let perms = Permutation::generate_all(n);
 
-    let g = generate_automorphism_table(&squares, &perms);
-
-    let t = latex_generate_fancy_cross_table(&g, perms.len(), squares, perms);
-
-    println!("{}", t);
+    print_affine_automorphism_table(&squares, &perms);
 }
