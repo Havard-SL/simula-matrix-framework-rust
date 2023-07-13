@@ -22,3 +22,7 @@ Cargo.lock
 
 *.aux
 *.log
+
+# Vscode
+
+.vscode
