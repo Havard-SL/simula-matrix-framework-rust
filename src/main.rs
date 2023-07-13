@@ -3,6 +3,8 @@
 mod common;
 
 mod latin_square;
+use std::fmt::Display;
+
 use latin_square::LatinSquare;
 use latin_square::LatinStructure;
 use latin_square::Permutation;
@@ -417,6 +419,31 @@ fn print_affine_automorphism_table(squares: &[LatinSquare], perms: &[Permutation
     let text = generate_cross_table_2(&result);
 
     println!("{}", &text);
+}
+
+pub trait LaTeXIfy {
+    fn latex(&self) -> String;
+}
+
+type Row<S> = Vec<S>;
+
+// A table, where left[i] + right[i] becomes one row in the table.
+// Split it up in order to make the abstraction cleaner and maybe slightly faster?
+struct Table<L, R> {
+    left: Vec<Row<L>>,
+    right: Vec<Row<R>>,
+}
+
+impl<L: Display, R: Display> Display for Table<L, R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl<L: LaTeXIfy, R: LaTeXIfy> LaTeXIfy for Table<L, R>  {
+    fn latex(&self) -> String {
+        todo!()
+    }
 }
 
 fn main() {
