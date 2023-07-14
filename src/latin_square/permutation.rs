@@ -1,3 +1,10 @@
+use super::LaTeX;
+
+use super::AffineAutomorphism;
+use super::AllAffineAutomorphisms;
+
+use super::Sidedness;
+
 pub fn permutation_recursion(n: usize, part_of_permutation: Vec<usize>) -> Vec<Vec<usize>> {
     if part_of_permutation.len() == n {
         return vec![part_of_permutation];
@@ -47,5 +54,68 @@ impl Permutation {
 
     pub fn print(&self) {
         todo!()
+    }
+}
+
+impl LaTeX for Permutation {
+    fn latex(&self) -> String {
+        let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
+
+        text.push_str(&self.0[0].to_string());
+
+        for p in self.0.iter() {
+            text.push_str(" & ");
+            text.push_str(&p.to_string());
+        }
+
+        text.push_str("\n\\end{smallmatrix} \\)");
+
+        text
+    }
+}
+
+impl LaTeX for AffineAutomorphism {
+    fn latex(&self) -> String {
+        let mut text: String = "\\( ".to_string();
+        
+        match self.2 {
+            Sidedness::Left => {
+                text.push_str(&self.1.to_string());
+                text.push_str(" + p_{");
+                text.push_str(&self.0.to_string());
+                text.push('}')
+            }
+            Sidedness::Right => {
+                text.push_str("p_{");
+                text.push_str(&self.0.to_string());
+                text.push('}');
+                text.push_str(" + ");
+                text.push_str(&self.1.to_string());
+            }
+        };
+
+        text.push_str(" \\)");
+
+        text
+    }
+}
+
+impl LaTeX for AllAffineAutomorphisms {
+    fn latex(&self) -> String {
+        let mut text: String = "\\begin{tabular}{c}\n    ".to_string();
+
+        if self.0 {
+            text.push('x');
+        }
+
+        for affine_automorphism in self.1.iter() {
+            text.push_str("\\\\\\hline\n    ");
+            text.push_str(&affine_automorphism.latex());
+
+        }
+        
+        text.push_str("\n\\end{tabular}");
+
+        text
     }
 }

@@ -1,4 +1,5 @@
 use super::*;
+use super::latin_square::AllAffineAutomorphisms;
 
 // Generate a basic text table from a "sparce" boolean table.
 fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
