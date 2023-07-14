@@ -180,7 +180,7 @@ impl LatinSquare {
             let c = standard.pop().unwrap();
 
             if c != row[column] {
-                return false
+                return false;
             }
         }
 
@@ -205,7 +205,6 @@ impl LatinSquare {
 
     // Classifies the Latin square as a quasigroup, loop, group or abelian group.
     pub fn classify(&self) -> LatinStructure {
-
         if !self.right_identity() {
             return LatinStructure::Quasigroup;
         }
@@ -366,7 +365,7 @@ impl LaTeX for LatinType {
             text.push_str(row);
         }
         text.push_str("\\end{tabular}");
-        
+
         text
     }
 }
@@ -489,8 +488,6 @@ pub fn create_table(
         left[i + 1].push(SquareInformation::Square(s.square.clone()));
         left[i + 1].push(SquareInformation::Index(s.index));
         left[i + 1].push(SquareInformation::Class(s.class.clone()));
-
-
 
         right.push(vec![]);
 

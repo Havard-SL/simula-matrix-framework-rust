@@ -102,7 +102,6 @@ impl LaTeX for AffineAutomorphism {
 
 impl LaTeX for AllAffineAutomorphisms {
     fn latex(&self) -> String {
-
         let mut text: String = "".to_string();
 
         let b = !self.1.is_empty();

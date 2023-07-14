@@ -124,10 +124,9 @@ impl LaTeX for SquareInformation {
             }
             Self::None => {
                 text = "".to_string();
-            }
-            // Self::AllAffineAutomorphisms(all_affine_automorphisms) => {
-            //     text = all_affine_automorphisms.latex();
-            // }
+            } // Self::AllAffineAutomorphisms(all_affine_automorphisms) => {
+              //     text = all_affine_automorphisms.latex();
+              // }
         }
 
         text
