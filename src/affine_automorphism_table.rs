@@ -1,5 +1,5 @@
-use super::*;
 use super::latin_square::AllAffineAutomorphisms;
+use super::*;
 
 // Generate a basic text table from a "sparce" boolean table.
 fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
@@ -29,7 +29,6 @@ fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
 }
 
 fn latex_matrix(rows: &LatinSquare) -> String {
-
     let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
 
     for row in &rows.0 {
@@ -108,7 +107,12 @@ fn latex_generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
     text
 }
 
-fn latex_generate_fancy_cross_table(rows: &[Vec<usize>], length: usize, squares: Vec<LatinSquare>, perms: Vec<Permutation>) -> String {
+fn latex_generate_fancy_cross_table(
+    rows: &[Vec<usize>],
+    length: usize,
+    squares: Vec<LatinSquare>,
+    perms: Vec<Permutation>,
+) -> String {
     let mut text: String = "\\begin{longtable}{".to_string();
     text.push_str(&"| c ".repeat(length + 2));
     text.push_str("|} \\hline\n");
@@ -247,9 +251,8 @@ type LatinSquareClassification = (usize, LatinStructure, Vec<AllAffineAutomorphi
 fn generate_cross_table_2(table: &[LatinSquareClassification]) -> String {
     let mut text = "".to_string();
 
-    let mut border = "-".repeat((table[0].2.len() + 2)*14+ 1);
+    let mut border = "-".repeat((table[0].2.len() + 2) * 14 + 1);
     border.push('\n');
-
 
     text.push_str(&border);
 
@@ -267,9 +270,8 @@ fn generate_cross_table_2(table: &[LatinSquareClassification]) -> String {
     }
     text.push('\n');
     text.push_str(&border);
-    
-    for r in table.iter() {
 
+    for r in table.iter() {
         let mut height = 1;
 
         for p in &r.2 {
@@ -309,7 +311,7 @@ fn generate_cross_table_2(table: &[LatinSquareClassification]) -> String {
             text.push_str("      |");
         }
         text.push('\n');
-        
+
         for i in 0..(height - 1) {
             text.push_str("|             |             |");
             for w in &r.2 {
@@ -354,12 +356,11 @@ fn generate_cross_table_2(table: &[LatinSquareClassification]) -> String {
 }
 
 fn calculate_fingerprint(classification: &LatinSquareClassification) -> usize {
-
     let mut fingerprint: usize = match classification.1 {
         LatinStructure::Quasigroup => 3,
         LatinStructure::Loop => 2,
         LatinStructure::Group => 1,
-        LatinStructure::Abelian => 0,    
+        LatinStructure::Abelian => 0,
     };
 
     for (i, c) in classification.2.iter().enumerate() {
@@ -375,20 +376,22 @@ fn print_affine_automorphism_table(squares: &[LatinSquare], perms: &[Permutation
     let mut result: Vec<LatinSquareClassification> = vec![];
 
     for (j, s) in squares.iter().enumerate() {
-        let mut row: LatinSquareClassification = (j, s.classify(), vec![(false, vec![]); perms.len()]);
+        let mut row: LatinSquareClassification =
+            (j, s.classify(), vec![(false, vec![]); perms.len()]);
 
         for (i, p) in perms.iter().enumerate() {
             let mut w = s.clone();
             w.apply_permutation(p.clone());
 
             if w == *s {
-
                 row.2[i].0 = true;
                 for v in 0..squares[0].0.len() {
-
                     for side in sidedness::SIDES {
                         let affine_automorphism = s.addition_permutation(v, &side).compose(p);
-                        let found_permutation = perms.iter().position(|x| x == &affine_automorphism).unwrap();
+                        let found_permutation = perms
+                            .iter()
+                            .position(|x| x == &affine_automorphism)
+                            .unwrap();
                         row.2[found_permutation].1.push((i, v, side));
                     }
                 }

@@ -44,7 +44,7 @@ impl Permutation {
 
     pub fn compose(&self, inner: &Permutation) -> Permutation {
         let mut result: Vec<usize> = vec![];
-        
+
         for i in 0..self.0.len() {
             result.push(self.0[inner.0[i]]);
         }
@@ -77,7 +77,7 @@ impl LaTeX for Permutation {
 impl LaTeX for AffineAutomorphism {
     fn latex(&self) -> String {
         let mut text: String = "\\( ".to_string();
-        
+
         match self.2 {
             Sidedness::Left => {
                 text.push_str(&self.1.to_string());
@@ -111,9 +111,8 @@ impl LaTeX for AllAffineAutomorphisms {
         for affine_automorphism in self.1.iter() {
             text.push_str("\\\\\\hline\n    ");
             text.push_str(&affine_automorphism.latex());
-
         }
-        
+
         text.push_str("\n\\end{tabular}");
 
         text

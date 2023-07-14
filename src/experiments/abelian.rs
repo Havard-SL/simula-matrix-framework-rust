@@ -1,8 +1,8 @@
-use std::time::Instant;
 use indicatif::ProgressBar;
+use std::time::Instant;
 
-use crate::common::factorial;
 use crate::abelian::*;
+use crate::common::factorial;
 use crate::latin_square::permutation::generate_all_permutations;
 
 pub fn speedtest_group_generation(

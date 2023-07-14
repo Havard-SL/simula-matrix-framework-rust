@@ -4,11 +4,11 @@ mod common;
 
 mod latin_square;
 
+use latin_square::sidedness;
 use latin_square::LatinSquare;
 use latin_square::LatinStructure;
 use latin_square::Permutation;
 use latin_square::Sidedness;
-use latin_square::sidedness;
 
 mod abelian;
 
@@ -45,7 +45,7 @@ fn main() {
     let perms = Permutation::generate_all(n);
 
     let mut classification = classify_all_latin_squares(&squares, &perms);
-    
+
     classification.sort_by_cached_key(|x| x.fingerprint());
 
     let table = create_table(classification);
@@ -53,5 +53,4 @@ fn main() {
     let text = table.latex();
 
     println!("{text}");
-
 }

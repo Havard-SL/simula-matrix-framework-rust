@@ -1,8 +1,8 @@
-use super::LaTeX;
-use super::Permutation;
-use super::LatinStructure;
-use super::LatinSquare;
 use super::latin_square::AllAffineAutomorphisms;
+use super::LaTeX;
+use super::LatinSquare;
+use super::LatinStructure;
+use super::Permutation;
 
 // A table, where left[i] + right[i] becomes one row in the table.
 // Split it up in order to make the abstraction cleaner and maybe slightly faster?
@@ -26,7 +26,6 @@ fn max_length<T>(rows: &[Vec<T>]) -> usize {
 impl<L: LaTeX, R: LaTeX> LaTeX for Table<L, R> {
     // Assume: left and right have same length.
     fn latex(&self) -> String {
-
         let mut text = "".to_string();
 
         let left_length = max_length(&self.left);
@@ -37,12 +36,11 @@ impl<L: LaTeX, R: LaTeX> LaTeX for Table<L, R> {
         text.push_str(&"c|".repeat(n));
         text.push_str("}\\hline\n");
 
-
         for (i, left_row) in self.left.iter().enumerate() {
             let right_row = &self.right[i];
 
             text.push_str("    ");
-            
+
             let mut first_passed = false;
 
             for element in left_row.iter() {
@@ -68,7 +66,6 @@ impl<L: LaTeX, R: LaTeX> LaTeX for Table<L, R> {
             if i == 0 {
                 text.push_str("\\endhead")
             }
-
         }
 
         text.push_str("\\end{longtable}");
@@ -115,18 +112,18 @@ impl LaTeX for SquareInformation {
         match self {
             Self::Class(class) => {
                 text = class.latex();
-            },
+            }
             Self::Index(index) => {
                 text = "\\( s_{".to_string();
                 text.push_str(&index.to_string());
                 text.push_str("} \\)");
-            },
+            }
             Self::Square(latin_square) => {
                 text = latin_square.latex();
-            },
+            }
             Self::None => {
                 text = "".to_string();
-            },
+            }
             // Self::AllAffineAutomorphisms(all_affine_automorphisms) => {
             //     text = all_affine_automorphisms.latex();
             // }

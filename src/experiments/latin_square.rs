@@ -1,7 +1,7 @@
 use indicatif::ProgressBar;
 
-use crate::latin_square::*;
 use crate::common::factorial;
+use crate::latin_square::*;
 
 // Checks if the class is exactly preserved under conjugacy.
 fn try_class_preserved_after_conjugacy(n: usize) {

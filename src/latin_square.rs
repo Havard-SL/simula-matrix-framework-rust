@@ -9,9 +9,9 @@ pub mod sidedness;
 
 use super::LaTeX;
 
-use super::table::Table;
-use super::table::SquareInformation;
 use super::table::PermutationInformation;
+use super::table::SquareInformation;
+use super::table::Table;
 
 #[derive(Debug, Clone, PartialEq)]
 struct PartialLatinSquare(Vec<Vec<usize>>);
@@ -231,7 +231,7 @@ impl LatinSquare {
 
     pub fn addition_permutation(&self, v: usize, side: &Sidedness) -> Permutation {
         let mut result: Vec<usize> = vec![];
-        
+
         for i in 0..self.0.len() {
             let r = match side {
                 Sidedness::Left => self.0[v][i],
@@ -268,21 +268,24 @@ pub struct LatinSquareClassification {
 }
 
 impl LatinSquareClassification {
-
     pub fn fingerprint(&self) -> usize {
         let mut fingerprint: usize = match self.class {
             LatinStructure::Quasigroup => 3,
             LatinStructure::Loop => 2,
             LatinStructure::Group => 1,
-            LatinStructure::Abelian => 0,    
+            LatinStructure::Abelian => 0,
         };
-    
-        for (i, c) in self.all_permutations_all_affine_automorphisms.iter().enumerate() {
+
+        for (i, c) in self
+            .all_permutations_all_affine_automorphisms
+            .iter()
+            .enumerate()
+        {
             if c.0 {
                 fingerprint += 2_usize.pow((i + 2).try_into().unwrap());
             }
         }
-    
+
         fingerprint
     }
 }
@@ -309,11 +312,15 @@ impl LaTeX for LatinSquare {
     }
 }
 
-pub fn classify_all_latin_squares(squares: &[LatinSquare], perms: &[Permutation]) -> Vec<LatinSquareClassification> {
+pub fn classify_all_latin_squares(
+    squares: &[LatinSquare],
+    perms: &[Permutation],
+) -> Vec<LatinSquareClassification> {
     let mut result: Vec<LatinSquareClassification> = vec![];
 
     for (j, s) in squares.iter().enumerate() {
-        let mut all_affine_automorphisms: Vec<AllAffineAutomorphisms> = vec![(false, vec![]); perms.len()];
+        let mut all_affine_automorphisms: Vec<AllAffineAutomorphisms> =
+            vec![(false, vec![]); perms.len()];
 
         for (i, p) in perms.iter().enumerate() {
             let mut w = s.clone();
@@ -323,31 +330,41 @@ pub fn classify_all_latin_squares(squares: &[LatinSquare], perms: &[Permutation]
                 all_affine_automorphisms[i].0 = true;
 
                 for v in 0..squares[0].0.len() {
-
                     for side in sidedness::SIDES {
                         let affine_automorphism = s.addition_permutation(v, &side).compose(p);
-                        let found_permutation = perms.iter().position(|x| x == &affine_automorphism).unwrap();
-                        all_affine_automorphisms[found_permutation].1.push((i, v, side));
+                        let found_permutation = perms
+                            .iter()
+                            .position(|x| x == &affine_automorphism)
+                            .unwrap();
+                        all_affine_automorphisms[found_permutation]
+                            .1
+                            .push((i, v, side));
                     }
                 }
             }
         }
 
         result.push(LatinSquareClassification {
-            class: s.classify(), 
-            index: j, 
-            square: s.clone(), 
-            all_permutations_all_affine_automorphisms: all_affine_automorphisms 
+            class: s.classify(),
+            index: j,
+            square: s.clone(),
+            all_permutations_all_affine_automorphisms: all_affine_automorphisms,
         });
     }
 
     result
 }
 
-pub fn create_table(rows: Vec<LatinSquareClassification>) -> Table<SquareInformation, PermutationInformation> {
-    let mut left: Vec<Vec<SquareInformation>> = vec![vec![SquareInformation::None, SquareInformation::None, SquareInformation::None]];
+pub fn create_table(
+    rows: Vec<LatinSquareClassification>,
+) -> Table<SquareInformation, PermutationInformation> {
+    let mut left: Vec<Vec<SquareInformation>> = vec![vec![
+        SquareInformation::None,
+        SquareInformation::None,
+        SquareInformation::None,
+    ]];
     let mut right: Vec<Vec<PermutationInformation>> = vec![vec![]];
-    
+
     for i in 0..rows[0].all_permutations_all_affine_automorphisms.len() {
         right[0].push(PermutationInformation::Index(i));
     }
@@ -362,9 +379,11 @@ pub fn create_table(rows: Vec<LatinSquareClassification>) -> Table<SquareInforma
         right.push(vec![]);
 
         for affine_automorphisms in s.all_permutations_all_affine_automorphisms.iter() {
-            right[i + 1].push(PermutationInformation::AllAffineAutomorphisms(affine_automorphisms.clone()));
+            right[i + 1].push(PermutationInformation::AllAffineAutomorphisms(
+                affine_automorphisms.clone(),
+            ));
         }
     }
 
-    Table {left, right}
+    Table { left, right }
 }
