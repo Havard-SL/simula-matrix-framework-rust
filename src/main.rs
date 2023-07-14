@@ -3,7 +3,6 @@
 mod common;
 
 mod latin_square;
-use std::fmt::Display;
 
 use latin_square::LatinSquare;
 use latin_square::LatinStructure;
@@ -15,414 +14,22 @@ mod abelian;
 
 mod experiments;
 
-// Generate a basic text table from a "sparce" boolean table.
-fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
-    let mut text: String = "".to_string();
-
-    let mut previous: Option<usize>;
-
-    for row in rows {
-        let mut work: String = "|".to_string();
-        previous = None;
-
-        for column in row {
-            if let Some(v) = previous {
-                work.push_str(&" |".repeat(column - v - 1));
-            }
-            previous = Some(*column);
-            work.push_str("x|");
-        }
-
-        work.push_str(&" |".repeat(length - 1 - previous.unwrap()));
-        work.push('\n');
-
-        text.push_str(&work);
-    }
-
-    text
-}
-
-fn latex_matrix(rows: &LatinSquare) -> String {
-
-    let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
-
-    for row in &rows.0 {
-        text.push_str("    ");
-        text.push_str(&row[0].to_string());
-        for r in row.iter().skip(1) {
-            text.push_str(" & ");
-            text.push_str(&r.to_string());
-        }
-        text.push_str(" \\\\\n")
-    }
-    text.push_str("\\end{smallmatrix} \\)\n");
-
-    text
-}
-
-fn latex_permutation(rows: &Permutation) -> String {
-    let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
-
-    text.push_str("    ");
-    text.push_str(&0.to_string());
-    for r in 1..rows.0.len() {
-        text.push_str(" & ");
-        text.push_str(&r.to_string());
-    }
-    text.push_str(" \\\\\n");
-
-    text.push_str("    ");
-
-    text.push_str(&rows.0[0].to_string());
-    for r in rows.0.iter().skip(1) {
-        text.push_str(" & ");
-        text.push_str(&r.to_string());
-    }
-
-    text.push_str(" \\\\\n");
-
-    text.push_str("\\end{smallmatrix} \\)\n");
-
-    text
-}
-
-// Generate a latex table from a "sparce" boolean table.
-fn latex_generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
-    let mut text: String = "\\begin{tabular}{".to_string();
-    text.push_str(&"| c ".repeat(length));
-    text.push_str("|} \\hline\n");
-
-    let mut previous: Option<usize>;
-
-    for row in rows {
-        let mut work: String = "    ".to_string();
-        previous = None;
-
-        for column in row {
-            if let Some(v) = previous {
-                work.push_str(&"   &".repeat(column - v - 1));
-            }
-            previous = Some(*column);
-            if *column != length - 1 {
-                work.push_str(" x &");
-            } else {
-                work.push_str(" x");
-            }
-        }
-        if previous.unwrap() != length - 1 {
-            work.push_str(&"   &".repeat(length - 2 - previous.unwrap()));
-            work.push_str("  ");
-        }
-        work.push_str(" \\\\ \\hline\n");
-
-        text.push_str(&work);
-    }
-    text.push_str("\\end{tabular}");
-
-    text
-}
-
-fn latex_generate_fancy_cross_table(rows: &[Vec<usize>], length: usize, squares: Vec<LatinSquare>, perms: Vec<Permutation>) -> String {
-    let mut text: String = "\\begin{longtable}{".to_string();
-    text.push_str(&"| c ".repeat(length + 2));
-    text.push_str("|} \\hline\n");
-
-    let mut previous: Option<usize>;
-
-    text.push_str(" Class & Latin Square");
-
-    for p in &perms {
-        text.push_str("& ");
-        text.push_str(&latex_permutation(p))
-    }
-    text.push_str(" \\\\ \\hline\n\\endhead\n");
-
-    for (i, row) in rows.iter().enumerate() {
-        let mut work: String = "    ".to_string();
-
-        let class = match squares[i].classify() {
-            LatinStructure::Quasigroup => "Quasigroup",
-            LatinStructure::Loop => "\\rowcolor{lime} Loop",
-            LatinStructure::Group => "Group",
-            LatinStructure::Abelian => "\\rowcolor{cyan} Abelian",
-        };
-
-        work.push_str(class);
-
-        // if row == &vec![0] {
-        //     work.push_str(" \\rowcolor{gray} ");
-        // }
-
-        work.push_str(" &\n");
-
-        work.push_str(&latex_matrix(&squares[i]));
-
-        work.push_str(" & ");
-
-        previous = None;
-
-        for column in row {
-            if let Some(v) = previous {
-                work.push_str(&"   &".repeat(column - v - 1));
-            }
-            previous = Some(*column);
-            if *column != length - 1 {
-                work.push_str(" \\cellcolor[HTML]{AA0044} x &");
-            } else {
-                work.push_str(" \\cellcolor[HTML]{AA0044} x");
-            }
-        }
-        if previous.unwrap() != length - 1 {
-            work.push_str(&"   &".repeat(length - 2 - previous.unwrap()));
-            work.push_str("  ");
-        }
-        work.push_str(" \\\\ \\hline\n");
-
-        text.push_str(&work);
-    }
-    text.push_str("\\end{longtable}");
-
-    text
-}
-
-// Check and print if there are any permutations that are not an automorphism for any latin square.
-// Check and print if there are any latin squares that only has the identity as an automorphism.
-fn try_automorphism_groups_porperties(
-    automorphisms_given_group: Vec<Vec<usize>>,
-    squares: Vec<LatinSquare>,
-    perms: Vec<Permutation>,
-) {
-    let mut j: usize = 0;
-
-    'i: for (i, p) in perms.iter().enumerate() {
-        for row in &automorphisms_given_group {
-            if row.binary_search(&i).is_ok() {
-                continue 'i;
-            }
-        }
-
-        j += 1;
-
-        println!("Permutation number {i}, {:?} is no automorphism.", p);
-
-        if j == 10 {
-            println!("Too many permutations, stopped.");
-            break;
-        }
-    }
-
-    let mut j: usize = 0;
-
-    for (i, row) in automorphisms_given_group.iter().enumerate() {
-        if row == &vec![0] {
-            println!("Square number {i}: ");
-            squares[i].print();
-            println!("Has only trivial automorphisms.");
-
-            j += 1;
-
-            if j == 10 {
-                println!("Too many squares, stopped.");
-                break;
-            }
-        }
-    }
-}
-
-// Takes a vec of latin squares, and a vec of permutations and creates the sparse bool table
-// where a permutation is an automorphism for a latin square.
-fn generate_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) -> Vec<Vec<usize>> {
-    let mut automorphisms_given_group: Vec<Vec<usize>> = vec![];
-
-    // Iterate over every latin square.
-    for s in squares.iter() {
-        let mut row: Vec<usize> = vec![];
-
-        // Iterate over every permutation
-        for (i, p) in perms.iter().enumerate() {
-            let mut w = s.clone();
-
-            // Apply the permutation to the latin square.
-            w.apply_permutation(p.clone());
-
-            // If the resulting latin square is equal to the starting latin square, then add the (index of the) permutation as an automorphism for that latin square.
-            if w == *s {
-                row.push(i)
-            }
-        }
-        automorphisms_given_group.push(row);
-    }
-
-    automorphisms_given_group
-}
+mod affine_automorphism_table;
 
 type AffineAutomorphism = (usize, usize, Sidedness);
 type AllAffineAutomorphisms = (bool, Vec<AffineAutomorphism>);
-type LatinSquareClassification = (usize, LatinStructure, Vec<AllAffineAutomorphisms>);
 
-fn generate_cross_table_2(table: &[LatinSquareClassification]) -> String {
-    let mut text = "".to_string();
-
-    let mut border = "-".repeat((table[0].2.len() + 2)*14+ 1);
-    border.push('\n');
-
-
-    text.push_str(&border);
-
-    text.push_str(&"|             ".repeat(2));
-    text.push('|');
-
-    for i in 0..table[0].2.len() {
-        text.push_str("     p_");
-        text.push_str(&i.to_string());
-        if i < 10 {
-            text.push_str("     |");
-        } else {
-            text.push_str("    |");
-        }
-    }
-    text.push('\n');
-    text.push_str(&border);
-    
-    for r in table.iter() {
-
-        let mut height = 1;
-
-        for p in &r.2 {
-            let mut working_height = 1;
-
-            working_height += p.1.len();
-
-            if working_height > height {
-                height = working_height;
-            }
-        }
-
-        text.push_str("|     s_");
-        text.push_str(&r.0.to_string());
-
-        if r.0 < 10 {
-            text.push_str("     |");
-        } else {
-            text.push_str("    |");
-        }
-
-        let t = match r.1 {
-            LatinStructure::Quasigroup => " Quasigroup  |",
-            LatinStructure::Loop => " Loop        |",
-            LatinStructure::Group => " Group       |",
-            LatinStructure::Abelian => " Abelian     |",
-        };
-
-        text.push_str(t);
-
-        for w in &r.2 {
-            if w.0 {
-                text.push_str("      x");
-            } else {
-                text.push_str("       ");
-            }
-            text.push_str("      |");
-        }
-        text.push('\n');
-        
-        for i in 0..(height - 1) {
-            text.push_str("|             |             |");
-            for w in &r.2 {
-                if let Some(x) = w.1.get(i) {
-                    text.push_str("  ");
-                    match x.2 {
-                        Sidedness::Left => {
-                            if x.1 < 10 {
-                                text.push(' ');
-                            }
-                            text.push_str(&x.1.to_string());
-                            text.push_str(" + p_");
-                            text.push_str(&x.0.to_string());
-                            if x.0 < 10 {
-                                text.push(' ');
-                            }
-                        }
-                        Sidedness::Right => {
-                            if x.0 < 10 {
-                                text.push(' ');
-                            }
-                            text.push_str("p_");
-                            text.push_str(&x.0.to_string());
-                            text.push_str(" + ");
-                            text.push_str(&x.1.to_string());
-                            if x.1 < 10 {
-                                text.push(' ');
-                            }
-                        }
-                    };
-                    text.push_str("  |")
-                } else {
-                    text.push_str("             |")
-                }
-            }
-            text.push('\n');
-        }
-        text.push_str(&border);
-    }
-
-    text
-}
-
-fn calculate_fingerprint(classification: &LatinSquareClassification) -> usize {
-
-    let mut fingerprint: usize = match classification.1 {
-        LatinStructure::Quasigroup => 3,
-        LatinStructure::Loop => 2,
-        LatinStructure::Group => 1,
-        LatinStructure::Abelian => 0,    
-    };
-
-    for (i, c) in classification.2.iter().enumerate() {
-        if c.0 {
-            fingerprint += 2_usize.pow((i + 2).try_into().unwrap());
-        }
-    }
-
-    fingerprint
-}
-
-fn print_affine_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) {
-    let mut result: Vec<LatinSquareClassification> = vec![];
-
-    for (j, s) in squares.iter().enumerate() {
-        let mut row: LatinSquareClassification = (j, s.classify(), vec![(false, vec![]); perms.len()]);
-
-        for (i, p) in perms.iter().enumerate() {
-            let mut w = s.clone();
-            w.apply_permutation(p.clone());
-
-            if w == *s {
-
-                row.2[i].0 = true;
-                for v in 0..squares[0].0.len() {
-
-                    for side in sidedness::SIDES {
-                        let affine_automorphism = s.addition_permutation(v, &side).compose(p);
-                        let found_permutation = perms.iter().position(|x| x == &affine_automorphism).unwrap();
-                        row.2[found_permutation].1.push((i, v, side));
-                    }
-                }
-            }
-        }
-
-        result.push(row);
-    }
-
-    result.sort_by_cached_key(calculate_fingerprint);
-
-    let text = generate_cross_table_2(&result);
-
-    println!("{}", &text);
-}
-
-pub trait LaTeXIfy {
+pub trait LaTeX {
     fn latex(&self) -> String;
+}
+
+// Store max width?
+pub trait ASCII {
+    fn ascii(&self) -> Row<String>;
+
+    fn width(&self) -> usize;
+
+    fn height(&self) -> usize;
 }
 
 type Row<S> = Vec<S>;
@@ -434,18 +41,335 @@ struct Table<L, R> {
     right: Vec<Row<R>>,
 }
 
-impl<L: Display, R: Display> Display for Table<L, R> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+fn max_length<T>(rows: &[Vec<T>]) -> usize {
+    let mut longest: usize = 0;
+
+    for r in rows {
+        if r.len() > longest {
+            longest = r.len();
+        }
     }
+
+    longest
 }
 
-impl<L: LaTeXIfy, R: LaTeXIfy> LaTeXIfy for Table<L, R>  {
+impl<L: LaTeX, R: LaTeX> LaTeX for Table<L, R> {
+    // Assume: left and right have same length.
     fn latex(&self) -> String {
-        todo!()
+
+        let mut text = "".to_string();
+
+        let left_length = max_length(&self.left);
+
+        let n = left_length + self.right[0].len();
+
+        text.push_str("\\begin{longtable}{|");
+        text.push_str(&"c|".repeat(n));
+        text.push_str("}\\hline\n");
+
+
+        for (i, left_row) in self.left.iter().enumerate() {
+            let right_row = &self.right[i];
+
+            text.push_str("    ");
+            
+            let mut first_passed = false;
+
+            for element in left_row.iter() {
+                if first_passed {
+                    text.push_str(" & ");
+                } else {
+                    first_passed = true;
+                }
+                text.push_str(&element.latex());
+            }
+
+            for element in right_row.iter() {
+                if first_passed {
+                    text.push_str(" & ");
+                } else {
+                    first_passed = true;
+                }
+                text.push_str(&element.latex());
+            }
+
+            text.push_str("\\\\\\hline\n");
+
+            if i == 0 {
+                text.push_str("\\endhead")
+            }
+
+        }
+
+        text.push_str("\\end{longtable}");
+
+        text
     }
 }
 
+impl LaTeX for LatinStructure {
+    fn latex(&self) -> String {
+        let text = match self {
+            LatinStructure::Quasigroup => "Quasigroup",
+            LatinStructure::Loop => "Loop",
+            LatinStructure::Group => "Group",
+            LatinStructure::Abelian => "Abelian",
+        };
+
+        text.to_string()
+    }
+}
+
+struct LatinSquareClassification {
+    class: LatinStructure,
+    index: usize,
+    square: LatinSquare,
+    all_permutations_all_affine_automorphisms: Vec<AllAffineAutomorphisms>,
+}
+
+impl LatinSquareClassification {
+
+    fn fingerprint(&self) -> usize {
+        let mut fingerprint: usize = match self.class {
+            LatinStructure::Quasigroup => 3,
+            LatinStructure::Loop => 2,
+            LatinStructure::Group => 1,
+            LatinStructure::Abelian => 0,    
+        };
+    
+        for (i, c) in self.all_permutations_all_affine_automorphisms.iter().enumerate() {
+            if c.0 {
+                fingerprint += 2_usize.pow((i + 2).try_into().unwrap());
+            }
+        }
+    
+        fingerprint
+    }
+}
+
+impl LaTeX for Permutation {
+    fn latex(&self) -> String {
+        let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
+
+        text.push_str(&self.0[0].to_string());
+
+        for p in self.0.iter() {
+            text.push_str(" & ");
+            text.push_str(&p.to_string());
+        }
+
+        text.push_str("\n\\end{smallmatrix} \\)");
+
+        text
+    }
+}
+
+enum PermutationInformation {
+    Permutation(Permutation),
+    Index(usize),
+    AllAffineAutomorphisms(AllAffineAutomorphisms),
+}
+
+impl LaTeX for PermutationInformation {
+    fn latex(&self) -> String {
+        let mut text: String;
+
+        match self {
+            Self::Permutation(p) => text = p.latex(),
+            Self::Index(i) => {
+                text = "\\( p_{".to_string();
+                text.push_str(&i.to_string());
+                text.push_str("} \\)");
+            }
+            Self::AllAffineAutomorphisms(a) => text = a.latex(),
+        };
+
+        text
+    }
+}
+
+enum SquareInformation {
+    Class(LatinStructure),
+    Index(usize),
+    Square(LatinSquare),
+    None,
+}
+
+impl LaTeX for SquareInformation {
+    fn latex(&self) -> String {
+        let mut text: String;
+
+        match self {
+            Self::Class(class) => {
+                text = class.latex();
+            },
+            Self::Index(index) => {
+                text = "\\( s_{".to_string();
+                text.push_str(&index.to_string());
+                text.push_str("} \\)");
+            },
+            Self::Square(latin_square) => {
+                text = latin_square.latex();
+            },
+            Self::None => {
+                text = "".to_string();
+            },
+            // Self::AllAffineAutomorphisms(all_affine_automorphisms) => {
+            //     text = all_affine_automorphisms.latex();
+            // }
+        }
+
+        text
+    }
+}
+
+impl LaTeX for LatinSquare {
+    fn latex(&self) -> String {
+        let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
+
+        for row in self.0.iter() {
+            text.push_str("    ");
+            text.push_str(&row.first().unwrap().to_string());
+
+            for v in row.iter().skip(1) {
+                text.push_str(" & ");
+                text.push_str(&v.to_string());
+            }
+
+            text.push_str("\\\\\n");
+        }
+
+        text.push_str("\\end{smallmatrix} \\)");
+
+        text
+    }
+}
+
+impl LaTeX for AffineAutomorphism {
+    fn latex(&self) -> String {
+        let mut text: String = "\\( ".to_string();
+        
+        match self.2 {
+            Sidedness::Left => {
+                text.push_str(&self.1.to_string());
+                text.push_str(" + p_{");
+                text.push_str(&self.0.to_string());
+                text.push('}')
+            }
+            Sidedness::Right => {
+                text.push_str("p_{");
+                text.push_str(&self.0.to_string());
+                text.push('}');
+                text.push_str(" + ");
+                text.push_str(&self.1.to_string());
+            }
+        };
+
+        text.push_str(" \\)");
+
+        text
+    }
+}
+
+impl LaTeX for AllAffineAutomorphisms {
+    fn latex(&self) -> String {
+        let mut text: String = "\\begin{tabular}{c}\n    ".to_string();
+
+        if self.0 {
+            text.push('x');
+        }
+
+        for affine_automorphism in self.1.iter() {
+            text.push_str("\\\\\\hline\n    ");
+            text.push_str(&affine_automorphism.latex());
+
+        }
+        
+        text.push_str("\n\\end{tabular}");
+
+        text
+    }
+}
+
+// fn calculate_fingerprint(classification: &LatinSquareClassification) -> usize {
+
+//     let mut fingerprint: usize = match classification.class {
+//         LatinStructure::Quasigroup => 3,
+//         LatinStructure::Loop => 2,
+//         LatinStructure::Group => 1,
+//         LatinStructure::Abelian => 0,    
+//     };
+
+//     for (i, c) in classification.all_permutations_all_affine_automorphisms.iter().enumerate() {
+//         if c.0 {
+//             fingerprint += 2_usize.pow((i + 2).try_into().unwrap());
+//         }
+//     }
+
+//     fingerprint
+// }
+
+fn classify_all_latin_squares(squares: &[LatinSquare], perms: &[Permutation]) -> Vec<LatinSquareClassification> {
+    let mut result: Vec<LatinSquareClassification> = vec![];
+
+    for (j, s) in squares.iter().enumerate() {
+        let mut all_affine_automorphisms: Vec<AllAffineAutomorphisms> = vec![(false, vec![]); perms.len()];
+
+        for (i, p) in perms.iter().enumerate() {
+            let mut w = s.clone();
+            w.apply_permutation(p.clone());
+
+            if w == *s {
+                all_affine_automorphisms[i].0 = true;
+
+                for v in 0..squares[0].0.len() {
+
+                    for side in sidedness::SIDES {
+                        let affine_automorphism = s.addition_permutation(v, &side).compose(p);
+                        let found_permutation = perms.iter().position(|x| x == &affine_automorphism).unwrap();
+                        all_affine_automorphisms[found_permutation].1.push((i, v, side));
+                    }
+                }
+            }
+        }
+
+        result.push(LatinSquareClassification {
+            class: s.classify(), 
+            index: j, 
+            square: s.clone(), 
+            all_permutations_all_affine_automorphisms: all_affine_automorphisms 
+        });
+    }
+
+    result
+}
+
+fn create_table(rows: Vec<LatinSquareClassification>) -> Table<SquareInformation, PermutationInformation> {
+    let mut left: Vec<Vec<SquareInformation>> = vec![vec![SquareInformation::None, SquareInformation::None, SquareInformation::None]];
+    let mut right: Vec<Vec<PermutationInformation>> = vec![vec![]];
+    
+    for i in 0..rows[0].all_permutations_all_affine_automorphisms.len() {
+        right[0].push(PermutationInformation::Index(i));
+    }
+
+    for (i, s) in rows.iter().enumerate() {
+        left.push(vec![]);
+
+        left[i + 1].push(SquareInformation::Square(s.square.clone()));
+        left[i + 1].push(SquareInformation::Index(s.index));
+        left[i + 1].push(SquareInformation::Class(s.class.clone()));
+
+        right.push(vec![]);
+
+        for affine_automorphisms in s.all_permutations_all_affine_automorphisms.iter() {
+            right[i + 1].push(PermutationInformation::AllAffineAutomorphisms(affine_automorphisms.clone()));
+        }
+    }
+
+    Table {left, right}
+}
+
+// TODO: Methods vs standalone functions.
 fn main() {
     // Set the dimension of the Latin squares i generate.
     let n = 3;
@@ -456,5 +380,14 @@ fn main() {
     // Generate all the permutations on n elements.
     let perms = Permutation::generate_all(n);
 
-    print_affine_automorphism_table(&squares, &perms);
+    let mut classification = classify_all_latin_squares(&squares, &perms);
+    
+    classification.sort_by_cached_key(|x| x.fingerprint());
+
+    let table = create_table(classification);
+
+    let text = table.latex();
+
+    println!("{text}");
+
 }
