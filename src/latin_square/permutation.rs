@@ -102,7 +102,7 @@ impl LaTeX for AffineAutomorphism {
 
 impl LaTeX for AllAffineAutomorphisms {
     fn latex(&self) -> String {
-        let mut text: String = "\\begin{tabular}{c}\n    ".to_string();
+        let mut text: String = "\\begin{tabular}{@{}c@{}}\n    ".to_string();
 
         if self.0 {
             text.push('x');

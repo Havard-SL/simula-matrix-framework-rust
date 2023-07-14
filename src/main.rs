@@ -24,15 +24,6 @@ use traits::LaTeX;
 use latin_square::classify_all_latin_squares;
 use latin_square::create_table;
 
-// Store max width?
-pub trait ASCII {
-    fn ascii(&self) -> Vec<String>;
-
-    fn width(&self) -> usize;
-
-    fn height(&self) -> usize;
-}
-
 // TODO: Methods vs standalone functions.
 fn main() {
     // Set the dimension of the Latin squares i generate.
