@@ -102,7 +102,19 @@ impl LaTeX for AffineAutomorphism {
 
 impl LaTeX for AllAffineAutomorphisms {
     fn latex(&self) -> String {
-        let mut text: String = "\\begin{tabular}{@{}c@{}}\n    ".to_string();
+
+        let mut text: String = "".to_string();
+
+        let b = !self.1.is_empty();
+
+        match (self.0, b) {
+            (false, false) => (),
+            (true, false) => text.push_str("\\cellcolor{blue}"),
+            (false, true) => text.push_str("\\cellcolor{yellow}"),
+            (true, true) => text.push_str("\\cellcolor{green}"),
+        }
+
+        text.push_str("\\begin{tabular}{@{}c@{}}\n    ");
 
         if self.0 {
             text.push('x');

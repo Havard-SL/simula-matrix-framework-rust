@@ -3,10 +3,10 @@ pub trait LaTeX {
 }
 
 // Store max width?
-pub trait ASCII {
-    fn ascii(&self) -> Vec<String>;
+// pub trait ASCII {
+//     fn ascii(&self) -> Vec<String>;
 
-    fn width(&self) -> usize;
+//     fn width(&self) -> usize;
 
-    fn height(&self) -> usize;
-}
+//     fn height(&self) -> usize;
+// }

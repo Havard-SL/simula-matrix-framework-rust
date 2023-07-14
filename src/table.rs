@@ -1,7 +1,8 @@
+use crate::latin_square::LatinType;
+
 use super::latin_square::AllAffineAutomorphisms;
 use super::LaTeX;
 use super::LatinSquare;
-use super::LatinStructure;
 use super::Permutation;
 
 // A table, where left[i] + right[i] becomes one row in the table.
@@ -99,7 +100,7 @@ impl LaTeX for PermutationInformation {
 }
 
 pub enum SquareInformation {
-    Class(LatinStructure),
+    Class(LatinType),
     Index(usize),
     Square(LatinSquare),
     None,

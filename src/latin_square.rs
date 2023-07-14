@@ -164,28 +164,61 @@ impl LatinSquare {
         }
     }
 
-    // Classifies the Latin square as a quasigroup, loop, group or abelian group.
-    pub fn classify(&self) -> LatinStructure {
+    fn right_identity(&self) -> bool {
         // Check if it contains a right-identity
+        let standard: Vec<usize> = (0..self.0.len()).collect();
+
+        self.0.contains(&standard)
+    }
+
+    fn left_identity(&self) -> bool {
         let mut standard: Vec<usize> = (0..self.0.len()).collect();
 
-        if !self.0.contains(&standard) {
-            return LatinStructure::Quasigroup;
-        }
-
-        // Check if it contains a left-identity
         let column = self.0[0].iter().position(|&x| x == 0).unwrap();
 
         for row in self.0.iter().rev() {
             let c = standard.pop().unwrap();
 
             if c != row[column] {
-                return LatinStructure::Quasigroup;
+                return false
             }
+        }
+
+        true
+    }
+
+    fn commutative(&self) -> bool {
+        for a in 1..self.0.len() {
+            for b in 0..a {
+                if self.0[a][b] != self.0[b][a] {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+    fn associative(&self) -> bool {
+        todo!()
+    }
+
+    // Classifies the Latin square as a quasigroup, loop, group or abelian group.
+    pub fn classify(&self) -> LatinStructure {
+
+        if !self.right_identity() {
+            return LatinStructure::Quasigroup;
+        }
+
+        // Check if it contains a left-identity
+        if !self.left_identity() {
+            return LatinStructure::Quasigroup;
         }
 
         // Check if associative
         let a: Vec<usize>;
+
+        let column = self.0[0].iter().position(|&x| x == 0).unwrap();
 
         if column == 0 {
             a = (1..self.0.len()).collect()
@@ -218,15 +251,46 @@ impl LatinSquare {
         }
 
         // Check if symmetric
-        for a in 1..self.0.len() {
-            for b in 0..a {
-                if self.0[a][b] != self.0[b][a] {
-                    return LatinStructure::Group;
-                }
-            }
+        if !self.commutative() {
+            return LatinStructure::Group;
         }
 
         LatinStructure::Abelian
+    }
+
+    pub fn classify_structure(&self) -> LatinType {
+        let class = self.classify();
+
+        // Left-id, right-id, commutative
+        let flags: (bool, bool, bool) = match class {
+            LatinStructure::Abelian => (true, true, true),
+            LatinStructure::Group => (true, true, false),
+            LatinStructure::Loop => {
+                if self.commutative() {
+                    (true, true, true)
+                } else {
+                    (true, true, false)
+                }
+            }
+            LatinStructure::Quasigroup => {
+                if self.commutative() {
+                    (false, false, true)
+                } else if self.left_identity() {
+                    (true, false, false)
+                } else if self.right_identity() {
+                    (false, true, false)
+                } else {
+                    (false, false, false)
+                }
+            }
+        };
+
+        LatinType {
+            commutative: flags.2,
+            left_identity: flags.0,
+            right_identity: flags.1,
+            structure: class,
+        }
     }
 
     pub fn addition_permutation(&self, v: usize, side: &Sidedness) -> Permutation {
@@ -257,11 +321,61 @@ impl LaTeX for LatinStructure {
     }
 }
 
+#[derive(Clone)]
+pub struct LatinType {
+    structure: LatinStructure,
+    left_identity: bool,
+    right_identity: bool,
+    commutative: bool,
+}
+
+impl LaTeX for LatinType {
+    fn latex(&self) -> String {
+        let mut text: String = "".to_string();
+
+        let mut additional_rows: Vec<&str> = vec![];
+
+        text.push_str("\\begin{tabular}{@{}c@{}}\n    ");
+
+        text.push_str(&self.structure.latex());
+        text.push_str("\\\\");
+
+        match self.structure {
+            LatinStructure::Loop => {
+                if self.commutative {
+                    additional_rows.push("Commutative");
+                }
+            }
+            LatinStructure::Quasigroup => {
+                if self.commutative {
+                    additional_rows.push("Commutative");
+                }
+                if self.left_identity && self.right_identity {
+                    additional_rows.push("Identity");
+                } else if self.left_identity {
+                    additional_rows.push("Left Identity");
+                } else if self.right_identity {
+                    additional_rows.push("Right Identity");
+                }
+            }
+            _ => (),
+        }
+
+        for row in additional_rows {
+            text.push_str("\\hline\n    ");
+            text.push_str(row);
+        }
+        text.push_str("\\end{tabular}");
+        
+        text
+    }
+}
+
 type AffineAutomorphism = (usize, usize, Sidedness);
 pub type AllAffineAutomorphisms = (bool, Vec<AffineAutomorphism>);
 
 pub struct LatinSquareClassification {
-    class: LatinStructure,
+    class: LatinType,
     index: usize,
     square: LatinSquare,
     all_permutations_all_affine_automorphisms: Vec<AllAffineAutomorphisms>,
@@ -269,7 +383,7 @@ pub struct LatinSquareClassification {
 
 impl LatinSquareClassification {
     pub fn fingerprint(&self) -> usize {
-        let mut fingerprint: usize = match self.class {
+        let mut fingerprint: usize = match self.class.structure {
             LatinStructure::Quasigroup => 3,
             LatinStructure::Loop => 2,
             LatinStructure::Group => 1,
@@ -345,7 +459,7 @@ pub fn classify_all_latin_squares(
         }
 
         result.push(LatinSquareClassification {
-            class: s.classify(),
+            class: s.classify_structure(),
             index: j,
             square: s.clone(),
             all_permutations_all_affine_automorphisms: all_affine_automorphisms,
@@ -375,6 +489,8 @@ pub fn create_table(
         left[i + 1].push(SquareInformation::Square(s.square.clone()));
         left[i + 1].push(SquareInformation::Index(s.index));
         left[i + 1].push(SquareInformation::Class(s.class.clone()));
+
+
 
         right.push(vec![]);
 
