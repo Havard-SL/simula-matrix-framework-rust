@@ -1,7 +1,10 @@
+use std::fmt::Display;
+
 use crate::latin_square::LatinType;
 
 use super::latin_square::AllAffineAutomorphisms;
 use super::LaTeX;
+use super::traits::SpreadsheetDisplay;
 use super::LatinSquare;
 use super::Permutation;
 
@@ -81,6 +84,23 @@ pub enum PermutationInformation {
     AllAffineAutomorphisms(AllAffineAutomorphisms),
 }
 
+impl Display for PermutationInformation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut text: String;
+
+        match self {
+            Self::Permutation(p) => text = p.to_string(),
+            Self::Index(i) => {
+                text = "p_".to_string();
+                text.push_str(&i.to_string());
+            }
+            Self::AllAffineAutomorphisms(a) => text = a.spreadsheet_display(),
+        };
+
+        write!(f, "{}", text)
+    }
+}
+
 impl LaTeX for PermutationInformation {
     fn latex(&self) -> String {
         let mut text: String;
@@ -104,6 +124,30 @@ pub enum SquareInformation {
     Index(usize),
     Square(LatinSquare),
     None,
+}
+
+impl Display for SquareInformation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut text: String;
+
+        match self {
+            Self::Class(class) => {
+                text = class.to_string();
+            }
+            Self::Index(index) => {
+                text = "s_".to_string();
+                text.push_str(&index.to_string());
+            }
+            Self::Square(latin_square) => {
+                text = latin_square.to_string();
+            }
+            Self::None => {
+                text = "".to_string();
+            }
+        }
+
+        write!(f, "{}", text)
+    }
 }
 
 impl LaTeX for SquareInformation {

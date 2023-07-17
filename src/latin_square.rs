@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use indicatif::ProgressBar;
 
 pub mod permutation;
@@ -6,6 +8,9 @@ pub use permutation::Permutation;
 pub use self::sidedness::Sidedness;
 
 pub mod sidedness;
+
+pub mod bits;
+pub use bits::Bits;
 
 use super::LaTeX;
 
@@ -164,14 +169,14 @@ impl LatinSquare {
         }
     }
 
-    fn right_identity(&self) -> bool {
+    fn left_identity(&self) -> bool {
         // Check if it contains a right-identity
         let standard: Vec<usize> = (0..self.0.len()).collect();
 
         self.0.contains(&standard)
     }
 
-    fn left_identity(&self) -> bool {
+    fn right_identity(&self) -> bool {
         let mut standard: Vec<usize> = (0..self.0.len()).collect();
 
         let column = self.0[0].iter().position(|&x| x == 0).unwrap();
@@ -205,12 +210,12 @@ impl LatinSquare {
 
     // Classifies the Latin square as a quasigroup, loop, group or abelian group.
     pub fn classify(&self) -> LatinStructure {
-        if !self.right_identity() {
+        if !self.left_identity() {
             return LatinStructure::Quasigroup;
         }
 
         // Check if it contains a left-identity
-        if !self.left_identity() {
+        if !self.right_identity() {
             return LatinStructure::Quasigroup;
         }
 
@@ -307,8 +312,8 @@ impl LatinSquare {
     }
 }
 
-impl LaTeX for LatinStructure {
-    fn latex(&self) -> String {
+impl Display for LatinStructure {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
             LatinStructure::Quasigroup => "Quasigroup",
             LatinStructure::Loop => "Loop",
@@ -316,7 +321,13 @@ impl LaTeX for LatinStructure {
             LatinStructure::Abelian => "Abelian",
         };
 
-        text.to_string()
+        write!(f, "{}", text)
+    }
+}
+
+impl LaTeX for LatinStructure {
+    fn latex(&self) -> String {
+        self.to_string()
     }
 }
 
@@ -326,6 +337,38 @@ pub struct LatinType {
     left_identity: bool,
     right_identity: bool,
     commutative: bool,
+}
+
+impl Display for LatinType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut text: String = "".to_string();
+
+        text.push_str(&self.structure.to_string());
+
+        text.push_str(match self.structure {
+            LatinStructure::Loop => {
+                if self.commutative {
+                    "\nCommutative"
+                } else {
+                    ""
+                }
+            }
+            LatinStructure::Quasigroup => {
+                if self.commutative {
+                    "\nCommutative"
+                } else if self.left_identity {
+                    "\nLeft Identity"
+                } else if self.right_identity {
+                    "\nRight Identity"
+                } else {
+                    ""
+                }
+            }
+            _ => "",
+        });
+        
+        write!(f, "{}", &text)
+    }
 }
 
 impl LaTeX for LatinType {
@@ -348,9 +391,6 @@ impl LaTeX for LatinType {
             LatinStructure::Quasigroup => {
                 if self.commutative {
                     additional_rows.push("Commutative");
-                }
-                if self.left_identity && self.right_identity {
-                    additional_rows.push("Identity");
                 } else if self.left_identity {
                     additional_rows.push("Left Identity");
                 } else if self.right_identity {
@@ -373,6 +413,7 @@ impl LaTeX for LatinType {
 type AffineAutomorphism = (usize, usize, Sidedness);
 pub type AllAffineAutomorphisms = (bool, Vec<AffineAutomorphism>);
 
+#[derive(Clone)]
 pub struct LatinSquareClassification {
     class: LatinType,
     index: usize,
@@ -381,25 +422,49 @@ pub struct LatinSquareClassification {
 }
 
 impl LatinSquareClassification {
-    pub fn fingerprint(&self) -> usize {
-        let mut fingerprint: usize = match self.class.structure {
-            LatinStructure::Quasigroup => 3,
-            LatinStructure::Loop => 2,
-            LatinStructure::Group => 1,
-            LatinStructure::Abelian => 0,
+    pub fn fingerprint(&self) -> Bits {
+        let mut fingerprint: Vec<bool> = match self.class.structure {
+            LatinStructure::Quasigroup => vec![false, false],
+            LatinStructure::Loop => vec![true, false],
+            LatinStructure::Group => vec![false, true],
+            LatinStructure::Abelian => vec![true, true],
         };
 
-        for (i, c) in self
+        for c in self
             .all_permutations_all_affine_automorphisms
             .iter()
-            .enumerate()
         {
-            if c.0 {
-                fingerprint += 2_usize.pow((i + 2).try_into().unwrap());
+            fingerprint.push(c.0);
+        }
+
+        Bits {
+            bits: fingerprint,
+        }
+    }
+}
+
+impl Display for LatinSquare {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut text: String = "".to_string();
+
+        let mut first: bool = true;
+
+        for row in self.0.iter() {
+            if !first {
+                text.push('\n');
+            } else {
+                first = false;
+            }
+
+            text.push_str(&row.first().unwrap().to_string());
+
+            for v in row.iter().skip(1) {
+                text.push(' ');
+                text.push_str(&v.to_string());
             }
         }
 
-        fingerprint
+        write!(f, "{}", &text)
     }
 }
 

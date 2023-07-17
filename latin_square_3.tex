@@ -1,112 +1,408 @@
-\begin{longtable}{| c | c | c | c | c | c | c | c |} \hline
- Class & Latin Square& \( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    0 & 1 & 2 \\
-\end{smallmatrix} \)
-& \( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    0 & 2 & 1 \\
-\end{smallmatrix} \)
-& \( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    1 & 0 & 2 \\
-\end{smallmatrix} \)
-& \( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    1 & 2 & 0 \\
-\end{smallmatrix} \)
-& \( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    2 & 0 & 1 \\
-\end{smallmatrix} \)
-& \( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    2 & 1 & 0 \\
-\end{smallmatrix} \)
- \\ \hline
-\endhead
-    \rowcolor{cyan} Abelian &
-\( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    1 & 2 & 0 \\
-    2 & 0 & 1 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x &   &   &   &   \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    0 & 1 & 2 \\
-    2 & 0 & 1 \\
-    1 & 2 & 0 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x &   &   &   &   \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    0 & 2 & 1 \\
-    1 & 0 & 2 \\
-    2 & 1 & 0 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x &   &   &   &   \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    0 & 2 & 1 \\
-    2 & 1 & 0 \\
-    1 & 0 & 2 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    1 & 0 & 2 \\
-    0 & 2 & 1 \\
-    2 & 1 & 0 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   &   & \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x &   \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    1 & 0 & 2 \\
-    2 & 1 & 0 \\
-    0 & 2 & 1 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   &   &   &   & \cellcolor[HTML]{AA0044} x \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    1 & 2 & 0 \\
-    0 & 1 & 2 \\
-    2 & 0 & 1 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   &   &   &   & \cellcolor[HTML]{AA0044} x \\ \hline
-    \rowcolor{cyan} Abelian &
-\( \begin{smallmatrix}
-    1 & 2 & 0 \\
-    2 & 0 & 1 \\
-    0 & 1 & 2 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   & \cellcolor[HTML]{AA0044} x &   &   &   \\ \hline
-    \rowcolor{cyan} Abelian &
-\( \begin{smallmatrix}
-    2 & 0 & 1 \\
-    0 & 1 & 2 \\
-    1 & 2 & 0 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   &   &   &   & \cellcolor[HTML]{AA0044} x \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    2 & 0 & 1 \\
-    1 & 2 & 0 \\
-    0 & 1 & 2 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   & \cellcolor[HTML]{AA0044} x &   &   &   \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    2 & 1 & 0 \\
-    0 & 2 & 1 \\
-    1 & 0 & 2 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   & \cellcolor[HTML]{AA0044} x &   &   &   \\ \hline
-    Quasigroup &
-\( \begin{smallmatrix}
-    2 & 1 & 0 \\
-    1 & 0 & 2 \\
-    0 & 2 & 1 \\
-\end{smallmatrix} \)
- &  \cellcolor[HTML]{AA0044} x &   &   & \cellcolor[HTML]{AA0044} x & \cellcolor[HTML]{AA0044} x &   \\ \hline
+\begin{longtable}{|c|c|c|c|c|c|c|c|c|}\hline
+     &  &  & \( p_{0} \) & \( p_{1} \) & \( p_{2} \) & \( p_{3} \) & \( p_{4} \) & \( p_{5} \)\\\hline
+\endhead    \( \begin{smallmatrix}
+    0 & 1 & 2\\
+    1 & 2 & 0\\
+    2 & 0 & 1\\
+\end{smallmatrix} \) & \( s_{0} \) & \begin{tabular}{@{}c@{}}
+    Abelian\\\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{0} + 0 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 0 + p_{1} \)\\\hline
+    \( p_{1} + 0 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{1} \)\\\hline
+    \( p_{1} + 1 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{0} + 1 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{0} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{1} \)\\\hline
+    \( p_{1} + 2 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    0 & 1 & 2\\
+    2 & 0 & 1\\
+    1 & 2 & 0\\
+\end{smallmatrix} \) & \( s_{1} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Right Identity\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{1} + 0 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 0 + p_{1} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 2 + p_{1} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{1} + 1 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{1} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 1 + p_{1} \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    0 & 2 & 1\\
+    1 & 0 & 2\\
+    2 & 1 & 0\\
+\end{smallmatrix} \) & \( s_{2} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Left Identity\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 0 + p_{1} \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{1} + 0 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{1} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 1 + p_{1} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 2 + p_{1} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{1} + 1 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    1 & 2 & 0\\
+    2 & 0 & 1\\
+    0 & 1 & 2\\
+\end{smallmatrix} \) & \( s_{7} \) & \begin{tabular}{@{}c@{}}
+    Abelian\\\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{0} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{2} \)\\\hline
+    \( p_{2} + 1 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 2 + p_{2} \)\\\hline
+    \( p_{2} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{0} + 0 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{0} + 1 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{2} \)\\\hline
+    \( p_{2} + 0 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    2 & 0 & 1\\
+    1 & 2 & 0\\
+    0 & 1 & 2\\
+\end{smallmatrix} \) & \( s_{9} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Right Identity\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{2} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 0 + p_{2} \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 2 + p_{2} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{2} + 0 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{2} + 1 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 1 + p_{2} \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    2 & 1 & 0\\
+    0 & 2 & 1\\
+    1 & 0 & 2\\
+\end{smallmatrix} \) & \( s_{10} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Left Identity\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 2 + p_{2} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{2} + 0 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{2} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 0 + p_{2} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 1 + p_{2} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{2} + 1 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    1 & 0 & 2\\
+    0 & 2 & 1\\
+    2 & 1 & 0\\
+\end{smallmatrix} \) & \( s_{4} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Commutative\end{tabular} & \cellcolor{blue}\begin{tabular}{@{}c@{}}
+    x
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 0 + p_{3} \)\\\hline
+    \( p_{3} + 0 \)\\\hline
+    \( 2 + p_{4} \)\\\hline
+    \( p_{4} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 2 + p_{3} \)\\\hline
+    \( p_{3} + 2 \)\\\hline
+    \( 1 + p_{4} \)\\\hline
+    \( p_{4} + 1 \)
+\end{tabular} & \cellcolor{blue}\begin{tabular}{@{}c@{}}
+    x
+\end{tabular} & \cellcolor{blue}\begin{tabular}{@{}c@{}}
+    x
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 1 + p_{3} \)\\\hline
+    \( p_{3} + 1 \)\\\hline
+    \( 0 + p_{4} \)\\\hline
+    \( p_{4} + 0 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    2 & 1 & 0\\
+    1 & 0 & 2\\
+    0 & 2 & 1\\
+\end{smallmatrix} \) & \( s_{11} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Commutative\end{tabular} & \cellcolor{blue}\begin{tabular}{@{}c@{}}
+    x
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 1 + p_{3} \)\\\hline
+    \( p_{3} + 1 \)\\\hline
+    \( 0 + p_{4} \)\\\hline
+    \( p_{4} + 0 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 0 + p_{3} \)\\\hline
+    \( p_{3} + 0 \)\\\hline
+    \( 2 + p_{4} \)\\\hline
+    \( p_{4} + 2 \)
+\end{tabular} & \cellcolor{blue}\begin{tabular}{@{}c@{}}
+    x
+\end{tabular} & \cellcolor{blue}\begin{tabular}{@{}c@{}}
+    x
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 2 + p_{3} \)\\\hline
+    \( p_{3} + 2 \)\\\hline
+    \( 1 + p_{4} \)\\\hline
+    \( p_{4} + 1 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    2 & 0 & 1\\
+    0 & 1 & 2\\
+    1 & 2 & 0\\
+\end{smallmatrix} \) & \( s_{8} \) & \begin{tabular}{@{}c@{}}
+    Abelian\\\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{0} + 1 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{5} \)\\\hline
+    \( p_{5} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{5} \)\\\hline
+    \( p_{5} + 0 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{0} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{0} + 0 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 1 + p_{5} \)\\\hline
+    \( p_{5} + 1 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    1 & 0 & 2\\
+    2 & 1 & 0\\
+    0 & 2 & 1\\
+\end{smallmatrix} \) & \( s_{5} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Left Identity\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 1 + p_{5} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{5} + 0 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{5} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 2 + p_{5} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 0 + p_{5} \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{5} + 1 \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    1 & 2 & 0\\
+    0 & 1 & 2\\
+    2 & 0 & 1\\
+\end{smallmatrix} \) & \( s_{6} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Right Identity\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{5} + 1 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 0 + p_{5} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 2 + p_{5} \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{5} + 2 \)
+\end{tabular} & \cellcolor{yellow}\begin{tabular}{@{}c@{}}
+    \\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{5} + 0 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 1 + p_{5} \)
+\end{tabular}\\\hline
+    \( \begin{smallmatrix}
+    0 & 2 & 1\\
+    2 & 1 & 0\\
+    1 & 0 & 2\\
+\end{smallmatrix} \) & \( s_{3} \) & \begin{tabular}{@{}c@{}}
+    Quasigroup\\\hline
+    Commutative\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 0 + p_{1} \)\\\hline
+    \( p_{1} + 0 \)\\\hline
+    \( 2 + p_{2} \)\\\hline
+    \( p_{2} + 2 \)\\\hline
+    \( 1 + p_{5} \)\\\hline
+    \( p_{5} + 1 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 0 + p_{0} \)\\\hline
+    \( p_{0} + 0 \)\\\hline
+    \( 2 + p_{3} \)\\\hline
+    \( p_{3} + 2 \)\\\hline
+    \( 1 + p_{4} \)\\\hline
+    \( p_{4} + 1 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 2 + p_{0} \)\\\hline
+    \( p_{0} + 2 \)\\\hline
+    \( 1 + p_{3} \)\\\hline
+    \( p_{3} + 1 \)\\\hline
+    \( 0 + p_{4} \)\\\hline
+    \( p_{4} + 0 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 2 + p_{1} \)\\\hline
+    \( p_{1} + 2 \)\\\hline
+    \( 1 + p_{2} \)\\\hline
+    \( p_{2} + 1 \)\\\hline
+    \( 0 + p_{5} \)\\\hline
+    \( p_{5} + 0 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 1 + p_{1} \)\\\hline
+    \( p_{1} + 1 \)\\\hline
+    \( 0 + p_{2} \)\\\hline
+    \( p_{2} + 0 \)\\\hline
+    \( 2 + p_{5} \)\\\hline
+    \( p_{5} + 2 \)
+\end{tabular} & \cellcolor{green}\begin{tabular}{@{}c@{}}
+    x\\\hline
+    \( 1 + p_{0} \)\\\hline
+    \( p_{0} + 1 \)\\\hline
+    \( 0 + p_{3} \)\\\hline
+    \( p_{3} + 0 \)\\\hline
+    \( 2 + p_{4} \)\\\hline
+    \( p_{4} + 2 \)
+\end{tabular}\\\hline
 \end{longtable}
