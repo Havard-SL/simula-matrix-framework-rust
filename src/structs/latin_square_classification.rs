@@ -21,6 +21,14 @@ impl LatinSquareClassification {
             LatinStructure::Abelian => vec![false, false],
         };
 
+        fingerprint.append(&mut self.fingerprint_no_structure().bits);
+
+        Bits { bits: fingerprint }
+    }
+
+    pub fn fingerprint_no_structure(&self) -> Bits {
+        let mut fingerprint: Vec<bool> = vec![];
+
         for c in self.all_permutations_all_affine_automorphisms.iter() {
             fingerprint.push(c.0);
         }

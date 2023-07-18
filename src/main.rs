@@ -2,15 +2,19 @@
 
 mod structs;
 use structs::*;
+// use traits::LaTeX;
 
 mod common;
 
 mod spreadsheet;
 
+// use table::create_complete_table;
+// use spreadsheet::write_table_to_spreadsheet;
+
 // TODO: Methods vs standalone functions.
 fn main() {
     // Set the dimension of the Latin squares i generate.
-    let n = 5;
+    let n = 3;
 
     // Generate all the n by n latin squares.
     let squares = LatinSquare::generate_all(n); // [..1000].to_vec();
@@ -18,16 +22,10 @@ fn main() {
     // Generate all the permutations on n elements.
     let perms = Permutation::generate_all(n);
 
-    let mut classification: Vec<LatinSquareClassification> =
+    let classification: Vec<LatinSquareClassification> =
         structs::latin_square::classify_all_latin_squares(&squares, &perms);
 
-    classification.sort_by_cached_key(|x| x.fingerprint());
+    let table = table::create_summary_table(classification, &perms);
 
-    let table = structs::table::create_table(classification);
-
-    spreadsheet::write_table_to_spreadsheet(&table).unwrap();
-
-    // let text = table.latex();
-
-    // println!("{text}");
+    spreadsheet::write_table_to_spreadsheet(&table, n, "summary").unwrap();
 }

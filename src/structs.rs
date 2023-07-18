@@ -25,9 +25,6 @@ pub use latin_square_classification::LatinSquareClassification;
 mod latin_structure;
 use latin_structure::LatinStructure;
 
-mod permutation_information;
-pub use permutation_information::PermutationInformation;
-
 mod square_information;
 pub use square_information::SquareInformation;
 

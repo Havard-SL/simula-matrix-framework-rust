@@ -4,7 +4,6 @@ use super::super::LatinSquare;
 use super::super::LatinStructure;
 use super::super::LatinType;
 use super::super::Permutation;
-use super::super::PermutationInformation;
 use super::super::Sidedness;
 use super::super::SquareInformation;
 use super::super::Table;
@@ -42,36 +41,23 @@ fn max_length<T>(rows: &[Vec<T>]) -> usize {
     longest
 }
 
-impl<L: LaTeX, R: LaTeX> LaTeX for Table<L, R> {
-    // Assume: left and right have same length.
+impl<T: LaTeX> LaTeX for Table<T> {
+    // Assume: all rows have same length?
     fn latex(&self) -> String {
         let mut text = "".to_string();
 
-        let left_length = max_length(&self.left);
-
-        let n = left_length + self.right[0].len();
+        let n = max_length(&self.table);
 
         text.push_str("\\begin{longtable}{|");
         text.push_str(&"c|".repeat(n));
         text.push_str("}\\hline\n");
 
-        for (i, left_row) in self.left.iter().enumerate() {
-            let right_row = &self.right[i];
-
+        for (i, row) in self.table.iter().enumerate() {
             text.push_str("    ");
 
             let mut first_passed = false;
 
-            for element in left_row.iter() {
-                if first_passed {
-                    text.push_str(" & ");
-                } else {
-                    first_passed = true;
-                }
-                text.push_str(&element.latex());
-            }
-
-            for element in right_row.iter() {
+            for element in row.iter() {
                 if first_passed {
                     text.push_str(" & ");
                 } else {
@@ -216,24 +202,6 @@ impl LaTeX for LatinSquare {
     }
 }
 
-impl LaTeX for PermutationInformation {
-    fn latex(&self) -> String {
-        let mut text: String;
-
-        match self {
-            Self::Permutation(p) => text = p.latex(),
-            Self::Index(i) => {
-                text = "\\( p_{".to_string();
-                text.push_str(&i.to_string());
-                text.push_str("} \\)");
-            }
-            Self::AllAffineAutomorphisms(a) => text = a.latex(),
-        };
-
-        text
-    }
-}
-
 impl LaTeX for SquareInformation {
     fn latex(&self) -> String {
         let mut text: String;
@@ -242,19 +210,32 @@ impl LaTeX for SquareInformation {
             Self::Class(class) => {
                 text = class.latex();
             }
-            Self::Index(index) => {
+            Self::LatinSquareIndex(index) => {
                 text = "\\( s_{".to_string();
                 text.push_str(&index.to_string());
                 text.push_str("} \\)");
             }
-            Self::Square(latin_square) => {
+            Self::LatinSquare(latin_square) => {
                 text = latin_square.latex();
             }
             Self::None => {
                 text = "".to_string();
-            } // Self::AllAffineAutomorphisms(all_affine_automorphisms) => {
-              //     text = all_affine_automorphisms.latex();
-              // }
+            }
+            Self::Permutation(p) => text = p.latex(),
+            Self::PermutationIndex(i) => {
+                text = "\\( p_{".to_string();
+                text.push_str(&i.to_string());
+                text.push_str("} \\)");
+            }
+            Self::AllAffineAutomorphisms(a) => text = a.latex(),
+            Self::FingerprintIndex(index) => {
+                text = "\\( F_{".to_string();
+                text.push_str(&index.to_string());
+                text.push_str("} \\)");
+            }
+            Self::AutomorphismAndAffineSums((aut, aff)) => {
+                text = format!("Automorphisms: {}\\\\\nAffine Automorphisms: {}", aut, aff);
+            }
         }
 
         text

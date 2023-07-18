@@ -2,7 +2,6 @@ use color::Rgb;
 
 use super::super::AffineAutomorphism;
 use super::super::AllAffineAutomorphisms;
-use super::super::PermutationInformation;
 use super::super::Sidedness;
 use super::super::SpreadsheetColours;
 use super::super::SquareInformation;
@@ -73,18 +72,8 @@ impl SpreadsheetDisplay for SquareInformation {
     }
 
     fn color(&self) -> SpreadsheetColours {
-        SpreadsheetColours::NoColor
-    }
-}
-
-impl SpreadsheetDisplay for PermutationInformation {
-    fn spreadsheet_display(&self) -> String {
-        self.to_string()
-    }
-
-    fn color(&self) -> SpreadsheetColours {
         match self {
-            PermutationInformation::AllAffineAutomorphisms(a) => a.color(),
+            SquareInformation::AllAffineAutomorphisms(a) => a.color(),
             _ => SpreadsheetColours::NoColor,
         }
     }

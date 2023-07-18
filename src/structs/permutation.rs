@@ -56,9 +56,17 @@ impl Display for Permutation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut text: String = "".to_string();
 
+        text.push('0');
+
+        for p in 1..self.0.len() {
+            text.push(' ');
+            text.push_str(&p.to_string());
+        }
+        text.push('\n');
+
         text.push_str(&self.0[0].to_string());
 
-        for p in self.0.iter() {
+        for p in self.0.iter().skip(1) {
             text.push(' ');
             text.push_str(&p.to_string());
         }
