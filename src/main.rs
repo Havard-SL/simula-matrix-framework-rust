@@ -18,7 +18,7 @@ fn main() {
     // println!("{:?}", v_2.cmp(&v_2));
 
     // Generate all the n by n latin squares.
-    let squares = LatinSquare::generate_all(n)[..1000].to_vec();
+    let squares = LatinSquare::generate_all(n); // [..1000].to_vec();
 
     // Generate all the permutations on n elements.
     let perms = Permutation::generate_all(n);

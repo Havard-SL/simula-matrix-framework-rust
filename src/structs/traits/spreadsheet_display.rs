@@ -1,9 +1,16 @@
+use color::Rgb;
+
 use super::super::AffineAutomorphism;
 use super::super::AllAffineAutomorphisms;
 use super::super::Sidedness;
+use super::super::SquareInformation;
+use super::super::PermutationInformation;
+use super::super::SpreadsheetColours;
 
 pub trait SpreadsheetDisplay {
     fn spreadsheet_display(&self) -> String;
+
+    fn color(&self) -> SpreadsheetColours;
 }
 
 impl SpreadsheetDisplay for AffineAutomorphism {
@@ -26,20 +33,15 @@ impl SpreadsheetDisplay for AffineAutomorphism {
 
         text
     }
+
+    fn color(&self) -> SpreadsheetColours {
+        SpreadsheetColours::NoColor
+    }
 }
 
 impl SpreadsheetDisplay for AllAffineAutomorphisms {
     fn spreadsheet_display(&self) -> String {
         let mut text: String = "".to_string();
-
-        // let b = !self.1.is_empty();
-
-        // match (self.0, b) {
-        //     (false, false) => return "".to_string(),
-        //     (true, false) => text.push_str("\\cellcolor{blue}"),
-        //     (false, true) => text.push_str("\\cellcolor{yellow}"),
-        //     (true, true) => text.push_str("\\cellcolor{green}"),
-        // }
 
         if self.0 {
             text.push('x');
@@ -51,5 +53,39 @@ impl SpreadsheetDisplay for AllAffineAutomorphisms {
         }
 
         text
+    }
+
+    fn color(&self) -> SpreadsheetColours {
+        let b = !self.1.is_empty();
+
+        match (self.0, b) {
+            (false, false) => SpreadsheetColours::NoColor,
+            (true, false) => SpreadsheetColours::Automorphism(Rgb::new(77, 166, 255)),
+            (false, true) => SpreadsheetColours::AffineAutomorphism(Rgb::new(255, 255, 102)),
+            (true, true) => SpreadsheetColours::AutomorphismAndAffine(Rgb::new(85, 255, 51)),
+        }
+    }
+}
+
+impl SpreadsheetDisplay for SquareInformation {
+    fn spreadsheet_display(&self) -> String {
+        self.to_string()
+    }
+
+    fn color(&self) -> SpreadsheetColours {
+        SpreadsheetColours::NoColor
+    }
+}
+
+impl SpreadsheetDisplay for PermutationInformation {
+    fn spreadsheet_display(&self) -> String {
+        self.to_string()
+    }
+
+    fn color(&self) -> SpreadsheetColours {
+        match self {
+            PermutationInformation::AllAffineAutomorphisms(a) => a.color(),
+            _ => SpreadsheetColours::NoColor,
+        }
     }
 }

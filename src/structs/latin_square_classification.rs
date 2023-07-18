@@ -15,10 +15,10 @@ pub struct LatinSquareClassification {
 impl LatinSquareClassification {
     pub fn fingerprint(&self) -> Bits {
         let mut fingerprint: Vec<bool> = match self.class.structure {
-            LatinStructure::Quasigroup => vec![false, false],
-            LatinStructure::Loop => vec![true, false],
-            LatinStructure::Group => vec![false, true],
-            LatinStructure::Abelian => vec![true, true],
+            LatinStructure::Quasigroup => vec![true, true],
+            LatinStructure::Loop => vec![false, true],
+            LatinStructure::Group => vec![true, false],
+            LatinStructure::Abelian => vec![false, false],
         };
 
         for c in self.all_permutations_all_affine_automorphisms.iter() {

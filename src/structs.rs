@@ -1,4 +1,4 @@
-mod traits;
+pub mod traits;
 
 pub mod latin_square;
 pub use latin_square::LatinSquare;
@@ -30,6 +30,9 @@ pub use permutation_information::PermutationInformation;
 
 mod square_information;
 pub use square_information::SquareInformation;
+
+mod spreadsheet_colors;
+pub use spreadsheet_colors::SpreadsheetColours;
 
 type AffineAutomorphism = (usize, usize, Sidedness);
 pub type AllAffineAutomorphisms = (bool, Vec<AffineAutomorphism>);

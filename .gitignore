@@ -26,3 +26,7 @@ Cargo.lock
 # Vscode
 
 .vscode
+
+# ods lock
+
+*.~lock.*
