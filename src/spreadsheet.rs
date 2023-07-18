@@ -1,13 +1,12 @@
-use spreadsheet_ods::{WorkBook, Sheet, Value};
-use spreadsheet_ods::style::CellStyle;
 use color::Rgb;
 use icu_locid::locale;
+use spreadsheet_ods::style::CellStyle;
+use spreadsheet_ods::{Sheet, Value, WorkBook};
 
 use spreadsheet_ods::ValueFormatText;
 
-use crate::structs::{Table, SpreadsheetColours};
 use crate::structs::traits::SpreadsheetDisplay;
-
+use crate::structs::{SpreadsheetColours, Table};
 
 pub fn write_table_to_spreadsheet<L, R>(
     table: &Table<L, R>,
@@ -37,24 +36,30 @@ where
     color_style_automorphism.set_background_color(Rgb::new(77, 166, 255));
     let color_style_automorphism = wb.add_cellstyle(color_style_automorphism);
 
-
     let color_style_affine_automorphism = ValueFormatText::new_named("Affine Automorphism 1");
     let color_style_affine_automorphism = wb.add_text_format(color_style_affine_automorphism);
-    let mut color_style_affine_automorphism = CellStyle::new("Affine Automorphism 2", &color_style_affine_automorphism);
+    let mut color_style_affine_automorphism =
+        CellStyle::new("Affine Automorphism 2", &color_style_affine_automorphism);
     color_style_affine_automorphism.set_background_color(Rgb::new(255, 255, 102));
     let color_style_affine_automorphism = wb.add_cellstyle(color_style_affine_automorphism);
 
-    let color_style_automorphism_and_affine_automorphism = ValueFormatText::new_named("Automorphism And Affine Automorphism 1");
-    let color_style_automorphism_and_affine_automorphism = wb.add_text_format(color_style_automorphism_and_affine_automorphism);
-    let mut color_style_automorphism_and_affine_automorphism = CellStyle::new("Automorphism And Affine Automorphism 2", &color_style_automorphism_and_affine_automorphism);
+    let color_style_automorphism_and_affine_automorphism =
+        ValueFormatText::new_named("Automorphism And Affine Automorphism 1");
+    let color_style_automorphism_and_affine_automorphism =
+        wb.add_text_format(color_style_automorphism_and_affine_automorphism);
+    let mut color_style_automorphism_and_affine_automorphism = CellStyle::new(
+        "Automorphism And Affine Automorphism 2",
+        &color_style_automorphism_and_affine_automorphism,
+    );
     color_style_automorphism_and_affine_automorphism.set_background_color(Rgb::new(85, 255, 51));
-    let color_style_automorphism_and_affine_automorphism = wb.add_cellstyle(color_style_automorphism_and_affine_automorphism);
+    let color_style_automorphism_and_affine_automorphism =
+        wb.add_cellstyle(color_style_automorphism_and_affine_automorphism);
 
     let sheet = wb.sheet_mut(0);
 
     for (i, rows) in table.left.iter().enumerate() {
         let n = rows.len();
-        
+
         for (j, v) in rows.iter().enumerate() {
             sheet.set_value(
                 i.try_into().unwrap(),
@@ -64,39 +69,30 @@ where
         }
 
         for (j, v) in table.right[i].iter().enumerate() {
-            
             match v.color() {
-                SpreadsheetColours::Automorphism(_) => {
-                    sheet.set_styled_value(
-                        i.try_into().unwrap(),
-                        (j + n).try_into().unwrap(),
-                        Value::Text(v.spreadsheet_display()),
-                        &color_style_automorphism,
-                    ) 
-                }
-                SpreadsheetColours::AffineAutomorphism(_) => {
-                    sheet.set_styled_value(
-                        i.try_into().unwrap(),
-                        (j + n).try_into().unwrap(),
-                        Value::Text(v.spreadsheet_display()),
-                        &color_style_affine_automorphism,
-                    ) 
-                }
-                SpreadsheetColours::AutomorphismAndAffine(_) => {
-                    sheet.set_styled_value(
-                        i.try_into().unwrap(),
-                        (j + n).try_into().unwrap(),
-                        Value::Text(v.spreadsheet_display()),
-                        &color_style_automorphism_and_affine_automorphism,
-                    ) 
-                }
-                SpreadsheetColours::NoColor => {
-                    sheet.set_value(
-                        i.try_into().unwrap(),
-                        (j + n).try_into().unwrap(),
-                        Value::Text(v.spreadsheet_display()),
-                    )
-                }
+                SpreadsheetColours::Automorphism(_) => sheet.set_styled_value(
+                    i.try_into().unwrap(),
+                    (j + n).try_into().unwrap(),
+                    Value::Text(v.spreadsheet_display()),
+                    &color_style_automorphism,
+                ),
+                SpreadsheetColours::AffineAutomorphism(_) => sheet.set_styled_value(
+                    i.try_into().unwrap(),
+                    (j + n).try_into().unwrap(),
+                    Value::Text(v.spreadsheet_display()),
+                    &color_style_affine_automorphism,
+                ),
+                SpreadsheetColours::AutomorphismAndAffine(_) => sheet.set_styled_value(
+                    i.try_into().unwrap(),
+                    (j + n).try_into().unwrap(),
+                    Value::Text(v.spreadsheet_display()),
+                    &color_style_automorphism_and_affine_automorphism,
+                ),
+                SpreadsheetColours::NoColor => sheet.set_value(
+                    i.try_into().unwrap(),
+                    (j + n).try_into().unwrap(),
+                    Value::Text(v.spreadsheet_display()),
+                ),
             }
         }
     }

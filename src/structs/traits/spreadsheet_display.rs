@@ -2,10 +2,10 @@ use color::Rgb;
 
 use super::super::AffineAutomorphism;
 use super::super::AllAffineAutomorphisms;
-use super::super::Sidedness;
-use super::super::SquareInformation;
 use super::super::PermutationInformation;
+use super::super::Sidedness;
 use super::super::SpreadsheetColours;
+use super::super::SquareInformation;
 
 pub trait SpreadsheetDisplay {
     fn spreadsheet_display(&self) -> String;

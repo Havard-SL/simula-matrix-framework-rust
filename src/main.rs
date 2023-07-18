@@ -12,11 +12,6 @@ fn main() {
     // Set the dimension of the Latin squares i generate.
     let n = 5;
 
-    // let v_1 = Bits { bits: vec![true, true, false, true, false, true, true] };
-    // let v_2 = Bits { bits: vec![false, true, false, true, false, true, true] };
-
-    // println!("{:?}", v_2.cmp(&v_2));
-
     // Generate all the n by n latin squares.
     let squares = LatinSquare::generate_all(n); // [..1000].to_vec();
 
