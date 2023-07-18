@@ -1,10 +1,8 @@
-pub trait LaTeX {
-    fn latex(&self) -> String;
-}
+mod latex;
+pub use latex::LaTeX;
 
-pub trait SpreadsheetDisplay {
-    fn spreadsheet_display(&self) -> String;
-}
+mod spreadsheet_display;
+pub use spreadsheet_display::SpreadsheetDisplay;
 
 // Store max width?
 // pub trait ASCII {

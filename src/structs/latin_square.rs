@@ -2,86 +2,15 @@ use std::fmt::Display;
 
 use indicatif::ProgressBar;
 
-pub mod permutation;
-pub use permutation::Permutation;
+mod partial_latin_square;
+use partial_latin_square::PartialLatinSquare;
 
-pub use self::sidedness::Sidedness;
-
-pub mod sidedness;
-
-pub mod bits;
-pub use bits::Bits;
-
-use super::LaTeX;
-
-use super::table::PermutationInformation;
-use super::table::SquareInformation;
-use super::table::Table;
-
-#[derive(Debug, Clone, PartialEq)]
-struct PartialLatinSquare(Vec<Vec<usize>>);
-
-// Takes a partial latin square, and recursively creates the next partial latin squares,
-// until there are only full latin squares left.
-// TODO: May run faster if split up the cases where col = n or not?
-fn latin_square_recursion(n: usize, partial: PartialLatinSquare) -> Vec<LatinSquare> {
-    let mut result: Vec<LatinSquare> = vec![];
-
-    let last = partial.0.last().unwrap();
-
-    let mut col = last.len();
-    let mut row = partial.0.len() - 1;
-
-    if col == n {
-        col = 0;
-        row += 1;
-    }
-
-    'val: for i in 0..n {
-        // Check if i exists on current row.
-        if let Some(l) = partial.0.get(row) {
-            if l.contains(&i) {
-                continue 'val;
-            }
-        }
-
-        // Check if i exist on column.
-        for r in partial.0.iter().take(row) {
-            if r[col] == i {
-                continue 'val;
-            }
-        }
-
-        // Add i to the partial latin square.
-        let mut p = partial.0.clone();
-
-        if col == 0 {
-            p.push(vec![i]);
-        } else {
-            p.last_mut().unwrap().push(i);
-
-            if row == n - 1 && col == n - 1 {
-                return vec![LatinSquare(p)];
-            }
-        }
-
-        let p = PartialLatinSquare(p);
-
-        // Recursive call.
-        result.append(&mut latin_square_recursion(n, p));
-    }
-
-    result
-}
-
-// The different classes that a latin square can belong to.
-#[derive(Debug, Clone, PartialEq)]
-pub enum LatinStructure {
-    Quasigroup,
-    Loop,
-    Group,
-    Abelian,
-}
+use super::AllAffineAutomorphisms;
+use super::LatinSquareClassification;
+use super::LatinStructure;
+use super::LatinType;
+use super::Permutation;
+use super::Sidedness;
 
 // Represented as a vector of the rows of the latin square, where the rows are vectors of usize.
 // Always non-empty, square, and satisfies the latin square property.
@@ -132,7 +61,7 @@ impl LatinSquare {
 
         for i in 0..n {
             bar.inc(1);
-            result.append(&mut latin_square_recursion(
+            result.append(&mut partial_latin_square::latin_square_recursion(
                 n,
                 PartialLatinSquare(vec![vec![i]]),
             ));
@@ -312,137 +241,6 @@ impl LatinSquare {
     }
 }
 
-impl Display for LatinStructure {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let text = match self {
-            LatinStructure::Quasigroup => "Quasigroup",
-            LatinStructure::Loop => "Loop",
-            LatinStructure::Group => "Group",
-            LatinStructure::Abelian => "Abelian",
-        };
-
-        write!(f, "{}", text)
-    }
-}
-
-impl LaTeX for LatinStructure {
-    fn latex(&self) -> String {
-        self.to_string()
-    }
-}
-
-#[derive(Clone)]
-pub struct LatinType {
-    structure: LatinStructure,
-    left_identity: bool,
-    right_identity: bool,
-    commutative: bool,
-}
-
-impl Display for LatinType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut text: String = "".to_string();
-
-        text.push_str(&self.structure.to_string());
-
-        text.push_str(match self.structure {
-            LatinStructure::Loop => {
-                if self.commutative {
-                    "\nCommutative"
-                } else {
-                    ""
-                }
-            }
-            LatinStructure::Quasigroup => {
-                if self.commutative {
-                    "\nCommutative"
-                } else if self.left_identity {
-                    "\nLeft Identity"
-                } else if self.right_identity {
-                    "\nRight Identity"
-                } else {
-                    ""
-                }
-            }
-            _ => "",
-        });
-        
-        write!(f, "{}", &text)
-    }
-}
-
-impl LaTeX for LatinType {
-    fn latex(&self) -> String {
-        let mut text: String = "".to_string();
-
-        let mut additional_rows: Vec<&str> = vec![];
-
-        text.push_str("\\begin{tabular}{@{}c@{}}\n    ");
-
-        text.push_str(&self.structure.latex());
-        text.push_str("\\\\");
-
-        match self.structure {
-            LatinStructure::Loop => {
-                if self.commutative {
-                    additional_rows.push("Commutative");
-                }
-            }
-            LatinStructure::Quasigroup => {
-                if self.commutative {
-                    additional_rows.push("Commutative");
-                } else if self.left_identity {
-                    additional_rows.push("Left Identity");
-                } else if self.right_identity {
-                    additional_rows.push("Right Identity");
-                }
-            }
-            _ => (),
-        }
-
-        for row in additional_rows {
-            text.push_str("\\hline\n    ");
-            text.push_str(row);
-        }
-        text.push_str("\\end{tabular}");
-
-        text
-    }
-}
-
-type AffineAutomorphism = (usize, usize, Sidedness);
-pub type AllAffineAutomorphisms = (bool, Vec<AffineAutomorphism>);
-
-#[derive(Clone)]
-pub struct LatinSquareClassification {
-    class: LatinType,
-    index: usize,
-    square: LatinSquare,
-    all_permutations_all_affine_automorphisms: Vec<AllAffineAutomorphisms>,
-}
-
-impl LatinSquareClassification {
-    pub fn fingerprint(&self) -> Bits {
-        let mut fingerprint: Vec<bool> = match self.class.structure {
-            LatinStructure::Quasigroup => vec![false, false],
-            LatinStructure::Loop => vec![true, false],
-            LatinStructure::Group => vec![false, true],
-            LatinStructure::Abelian => vec![true, true],
-        };
-
-        for c in self
-            .all_permutations_all_affine_automorphisms
-            .iter()
-        {
-            fingerprint.push(c.0);
-        }
-
-        Bits {
-            bits: fingerprint,
-        }
-    }
-}
-
 impl Display for LatinSquare {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut text: String = "".to_string();
@@ -468,28 +266,6 @@ impl Display for LatinSquare {
     }
 }
 
-impl LaTeX for LatinSquare {
-    fn latex(&self) -> String {
-        let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
-
-        for row in self.0.iter() {
-            text.push_str("    ");
-            text.push_str(&row.first().unwrap().to_string());
-
-            for v in row.iter().skip(1) {
-                text.push_str(" & ");
-                text.push_str(&v.to_string());
-            }
-
-            text.push_str("\\\\\n");
-        }
-
-        text.push_str("\\end{smallmatrix} \\)");
-
-        text
-    }
-}
-
 pub fn classify_all_latin_squares(
     squares: &[LatinSquare],
     perms: &[Permutation],
@@ -508,7 +284,7 @@ pub fn classify_all_latin_squares(
                 all_affine_automorphisms[i].0 = true;
 
                 for v in 0..squares[0].0.len() {
-                    for side in sidedness::SIDES {
+                    for side in super::SIDES {
                         let affine_automorphism = s.addition_permutation(v, &side).compose(p);
                         let found_permutation = perms
                             .iter()
@@ -531,37 +307,4 @@ pub fn classify_all_latin_squares(
     }
 
     result
-}
-
-pub fn create_table(
-    rows: Vec<LatinSquareClassification>,
-) -> Table<SquareInformation, PermutationInformation> {
-    let mut left: Vec<Vec<SquareInformation>> = vec![vec![
-        SquareInformation::None,
-        SquareInformation::None,
-        SquareInformation::None,
-    ]];
-    let mut right: Vec<Vec<PermutationInformation>> = vec![vec![]];
-
-    for i in 0..rows[0].all_permutations_all_affine_automorphisms.len() {
-        right[0].push(PermutationInformation::Index(i));
-    }
-
-    for (i, s) in rows.iter().enumerate() {
-        left.push(vec![]);
-
-        left[i + 1].push(SquareInformation::Square(s.square.clone()));
-        left[i + 1].push(SquareInformation::Index(s.index));
-        left[i + 1].push(SquareInformation::Class(s.class.clone()));
-
-        right.push(vec![]);
-
-        for affine_automorphisms in s.all_permutations_all_affine_automorphisms.iter() {
-            right[i + 1].push(PermutationInformation::AllAffineAutomorphisms(
-                affine_automorphisms.clone(),
-            ));
-        }
-    }
-
-    Table { left, right }
 }
