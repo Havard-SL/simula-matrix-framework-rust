@@ -16,6 +16,7 @@ pub enum SquareInformation {
     AllAffineAutomorphisms(AllAffineAutomorphisms),
     FingerprintIndex(usize),
     AutomorphismAndAffineSums((usize, usize)),
+    Text(String),
     None,
 }
 
@@ -50,6 +51,7 @@ impl Display for SquareInformation {
             Self::AutomorphismAndAffineSums((aut, aff)) => {
                 text = format!("Aut: {}\nAAut: {}", aut, aff);
             }
+            Self::Text(t) => text = t.to_string(),
         }
 
         write!(f, "{}", text)

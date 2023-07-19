@@ -1,5 +1,3 @@
-use color::Rgb;
-
 use super::super::AffineAutomorphism;
 use super::super::AllAffineAutomorphisms;
 use super::super::Sidedness;
@@ -59,9 +57,9 @@ impl SpreadsheetDisplay for AllAffineAutomorphisms {
 
         match (self.0, b) {
             (false, false) => SpreadsheetColours::NoColor,
-            (true, false) => SpreadsheetColours::Automorphism(Rgb::new(77, 166, 255)),
-            (false, true) => SpreadsheetColours::AffineAutomorphism(Rgb::new(255, 255, 102)),
-            (true, true) => SpreadsheetColours::AutomorphismAndAffine(Rgb::new(85, 255, 51)),
+            (true, false) => SpreadsheetColours::Automorphism,
+            (false, true) => SpreadsheetColours::AffineAutomorphism,
+            (true, true) => SpreadsheetColours::AutomorphismAndAffine,
         }
     }
 }
@@ -74,6 +72,9 @@ impl SpreadsheetDisplay for SquareInformation {
     fn color(&self) -> SpreadsheetColours {
         match self {
             SquareInformation::AllAffineAutomorphisms(a) => a.color(),
+            SquareInformation::AutomorphismAndAffineSums((aut, aff)) => {
+                (aut != &0_usize, vec![(0, 0, Sidedness::Left); *aff]).color()
+            }
             _ => SpreadsheetColours::NoColor,
         }
     }

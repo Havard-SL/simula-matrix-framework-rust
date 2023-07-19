@@ -14,7 +14,7 @@ mod spreadsheet;
 // TODO: Methods vs standalone functions.
 fn main() {
     // Set the dimension of the Latin squares i generate.
-    let n = 3;
+    let n = 5;
 
     // Generate all the n by n latin squares.
     let squares = LatinSquare::generate_all(n); // [..1000].to_vec();

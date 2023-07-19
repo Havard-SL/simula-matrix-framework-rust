@@ -12,7 +12,6 @@ pub fn create_complete_table(
     mut rows: Vec<LatinSquareClassification>,
     perms: &[Permutation],
 ) -> Table<SquareInformation> {
-
     rows.sort_by_cached_key(|x| x.fingerprint());
 
     let mut table: Vec<Vec<SquareInformation>> = vec![
@@ -72,15 +71,19 @@ pub fn create_summary_table(
         }
     }
 
-    let mut table: Vec<Vec<SquareInformation>> = vec![vec![SquareInformation::None]];
+    split_indices.push(rows.len() - split_point);
 
-    for (i, _) in perms.iter().enumerate() {
-        table[0].push(SquareInformation::PermutationIndex(i));
-    } 
+    let mut table: Vec<Vec<SquareInformation>> =
+        vec![vec![SquareInformation::None], vec![SquareInformation::None]];
+    let mut sum_information: Vec<Vec<(usize, usize)>> = vec![];
+
+    for (i, p) in perms.iter().enumerate() {
+        table[0].push(SquareInformation::Permutation(p.clone()));
+        table[1].push(SquareInformation::PermutationIndex(i));
+    }
 
     let mut second: &mut [LatinSquareClassification] = &mut rows;
 
-    // TODO: Need to run one last iteration where the final second is the s_1. Or else will miss the final fingerprint class.
     for (f, i) in split_indices.into_iter().enumerate() {
         let (s_1, s_2) = second.split_at_mut(i);
 
@@ -89,7 +92,11 @@ pub fn create_summary_table(
         let mut sum: Vec<(usize, usize)> = vec![(0, 0); perms.len()];
 
         for s in s_1 {
-            for (j, c) in s.all_permutations_all_affine_automorphisms.iter().enumerate() {
+            for (j, c) in s
+                .all_permutations_all_affine_automorphisms
+                .iter()
+                .enumerate()
+            {
                 if c.0 {
                     sum[j].0 += 1;
                 }
@@ -99,13 +106,43 @@ pub fn create_summary_table(
             }
         }
 
-        table.push(vec![
-            SquareInformation::FingerprintIndex(f)
-        ]);
+        table.push(vec![SquareInformation::FingerprintIndex(f)]);
 
-        for aut_aff in sum {
-            table[f + 1].push(SquareInformation::AutomorphismAndAffineSums(aut_aff));
+        for aut_aff in &sum {
+            table[f + 2].push(SquareInformation::AutomorphismAndAffineSums(*aut_aff));
         }
+
+        sum_information.push(sum);
+    }
+
+    table.push(vec![SquareInformation::Text("Sum W/o 0".to_string())]);
+    table.push(vec![SquareInformation::Text("Sum All".to_string())]);
+
+    let mut sum: Vec<(usize, usize)> = vec![];
+
+    for (i, _) in sum_information[0].iter().enumerate() {
+        let mut working_sum: (usize, usize) = (0, 0);
+
+        for r in sum_information.iter().skip(1) {
+            working_sum.0 += r[i].0;
+            working_sum.1 += r[i].1;
+        }
+
+        sum.push(working_sum)
+    }
+    let length = table.len();
+
+    for c in &sum {
+        table[length - 2].push(SquareInformation::AutomorphismAndAffineSums(*c));
+    }
+
+    for (i, c) in sum.iter_mut().enumerate() {
+        c.0 += sum_information[0][i].0;
+        c.1 += sum_information[0][i].1;
+    }
+
+    for c in &sum {
+        table[length - 1].push(SquareInformation::AutomorphismAndAffineSums(*c));
     }
 
     Table { table }

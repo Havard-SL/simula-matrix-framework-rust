@@ -61,19 +61,19 @@ where
     for (i, rows) in table.table.iter().enumerate() {
         for (j, v) in rows.iter().enumerate() {
             match v.color() {
-                SpreadsheetColours::Automorphism(_) => sheet.set_styled_value(
+                SpreadsheetColours::Automorphism => sheet.set_styled_value(
                     i.try_into().unwrap(),
                     j.try_into().unwrap(),
                     Value::Text(v.spreadsheet_display()),
                     &color_style_automorphism,
                 ),
-                SpreadsheetColours::AffineAutomorphism(_) => sheet.set_styled_value(
+                SpreadsheetColours::AffineAutomorphism => sheet.set_styled_value(
                     i.try_into().unwrap(),
                     j.try_into().unwrap(),
                     Value::Text(v.spreadsheet_display()),
                     &color_style_affine_automorphism,
                 ),
-                SpreadsheetColours::AutomorphismAndAffine(_) => sheet.set_styled_value(
+                SpreadsheetColours::AutomorphismAndAffine => sheet.set_styled_value(
                     i.try_into().unwrap(),
                     j.try_into().unwrap(),
                     Value::Text(v.spreadsheet_display()),

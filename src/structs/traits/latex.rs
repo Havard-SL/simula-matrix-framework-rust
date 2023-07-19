@@ -236,6 +236,7 @@ impl LaTeX for SquareInformation {
             Self::AutomorphismAndAffineSums((aut, aff)) => {
                 text = format!("Automorphisms: {}\\\\\nAffine Automorphisms: {}", aut, aff);
             }
+            Self::Text(t) => text = t.clone(),
         }
 
         text
