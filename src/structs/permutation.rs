@@ -4,7 +4,7 @@ use std::fmt::Display;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Permutation(pub Vec<usize>);
 
-fn permutation_recursion(n: usize, part_of_permutation: Vec<usize>) -> Vec<Vec<usize>> {
+pub fn permutation_recursion(n: usize, part_of_permutation: Vec<usize>) -> Vec<Vec<usize>> {
     if part_of_permutation.len() == n {
         return vec![part_of_permutation];
     }

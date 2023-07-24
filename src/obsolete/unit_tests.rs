@@ -2,7 +2,8 @@
 // Not currently being used.
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::super::abelian::*;
+    use super::super::abelian::legacy_abelian::*;
 
     #[test]
     fn test_compare_all_group_generation_old_and_new() {

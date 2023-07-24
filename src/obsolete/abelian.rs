@@ -2,10 +2,9 @@ use indicatif::ProgressBar;
 use std::fs;
 use std::path::Path;
 
-use crate::latin_square::permutation::permutation_recursion;
-
-mod legacy_abelian;
+pub mod legacy_abelian;
 use legacy_abelian::generate_all_associativity_triplets;
+use crate::structs::permutation::permutation_recursion;
 
 // TODO: Write cleaner with "?" operator.
 // TODO: Can be optimized?

@@ -112,7 +112,7 @@ fn group_generation_recursion(table: &Vec<Vec<usize>>, n: usize) -> Vec<Vec<Vec<
     result
 }
 
-fn generate_all_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
+pub fn generate_all_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     let mut work: Vec<Vec<Vec<usize>>> = vec![];
 
     for i in 0..n {
@@ -123,7 +123,7 @@ fn generate_all_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     work
 }
 
-fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
+pub fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     let mut work: Vec<Vec<Vec<usize>>> = vec![];
 
     let v = (0..n).collect();

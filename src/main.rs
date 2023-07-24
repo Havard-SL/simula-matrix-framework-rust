@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+mod obsolete;
+
 mod structs;
 use structs::*;
 // use traits::LaTeX;

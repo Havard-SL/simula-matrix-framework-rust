@@ -1,9 +1,9 @@
 use indicatif::ProgressBar;
 use std::time::Instant;
 
-use crate::abelian::*;
+use super::super::abelian::*;
 use crate::common::factorial;
-use crate::latin_square::permutation::generate_all_permutations;
+use crate::structs::permutation::generate_all_permutations;
 
 pub fn speedtest_group_generation(
     f: &dyn Fn(usize) -> Vec<Vec<Vec<usize>>>,

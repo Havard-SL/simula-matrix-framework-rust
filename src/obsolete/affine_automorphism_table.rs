@@ -1,5 +1,9 @@
-use super::latin_square::AllAffineAutomorphisms;
-use super::*;
+use crate::structs::LatinSquare;
+use crate::structs::Permutation;
+use crate::structs::LatinStructure;
+use crate::structs::AllAffineAutomorphisms;
+use crate::structs::Sidedness;
+use crate::structs::SIDES;
 
 // Generate a basic text table from a "sparce" boolean table.
 fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
@@ -386,7 +390,7 @@ fn print_affine_automorphism_table(squares: &[LatinSquare], perms: &[Permutation
             if w == *s {
                 row.2[i].0 = true;
                 for v in 0..squares[0].0.len() {
-                    for side in sidedness::SIDES {
+                    for side in SIDES {
                         let affine_automorphism = s.addition_permutation(v, &side).compose(p);
                         let found_permutation = perms
                             .iter()

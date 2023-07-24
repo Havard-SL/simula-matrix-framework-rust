@@ -3,7 +3,7 @@ pub mod traits;
 pub mod latin_square;
 pub use latin_square::LatinSquare;
 
-mod permutation;
+pub mod permutation;
 pub use permutation::Permutation;
 
 mod bits;
@@ -23,7 +23,7 @@ mod latin_square_classification;
 pub use latin_square_classification::LatinSquareClassification;
 
 mod latin_structure;
-use latin_structure::LatinStructure;
+pub use latin_structure::LatinStructure;
 
 mod square_information;
 pub use square_information::SquareInformation;
