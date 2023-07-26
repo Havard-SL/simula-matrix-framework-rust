@@ -3,8 +3,8 @@ use std::fs;
 use std::path::Path;
 
 pub mod legacy_abelian;
-use legacy_abelian::generate_all_associativity_triplets;
 use crate::structs::permutation::permutation_recursion;
+use legacy_abelian::generate_all_associativity_triplets;
 
 // TODO: Write cleaner with "?" operator.
 // TODO: Can be optimized?
@@ -94,6 +94,7 @@ fn check_associativity(
 
 // Takes a table and tests the remaining associativity checks.
 // Returns None if not associative. Returns Some(v) with a subslice of the remaining_associativity_checks.
+// UNUSED
 fn check_associativity_advanced<'a>(
     table: &[Vec<usize>],
     remaining_associatvity_checks: &'a [[usize; 3]],

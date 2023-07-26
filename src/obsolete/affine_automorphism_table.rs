@@ -1,7 +1,7 @@
-use crate::structs::LatinSquare;
-use crate::structs::Permutation;
-use crate::structs::LatinStructure;
 use crate::structs::AllAffineAutomorphisms;
+use crate::structs::LatinSquare;
+use crate::structs::LatinStructure;
+use crate::structs::Permutation;
 use crate::structs::Sidedness;
 use crate::structs::SIDES;
 
@@ -32,6 +32,7 @@ fn generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
     text
 }
 
+// Superseded by latex trait
 fn latex_matrix(rows: &LatinSquare) -> String {
     let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
 
@@ -49,6 +50,7 @@ fn latex_matrix(rows: &LatinSquare) -> String {
     text
 }
 
+// Superseded by latex trait
 fn latex_permutation(rows: &Permutation) -> String {
     let mut text: String = "\\( \\begin{smallmatrix}\n".to_string();
 
@@ -76,6 +78,7 @@ fn latex_permutation(rows: &Permutation) -> String {
 }
 
 // Generate a latex table from a "sparce" boolean table.
+// Superseded by latex trait
 fn latex_generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
     let mut text: String = "\\begin{tabular}{".to_string();
     text.push_str(&"| c ".repeat(length));
@@ -111,6 +114,7 @@ fn latex_generate_cross_table(rows: &Vec<Vec<usize>>, length: usize) -> String {
     text
 }
 
+// Superseded by latex trait.
 fn latex_generate_fancy_cross_table(
     rows: &[Vec<usize>],
     length: usize,
@@ -177,50 +181,6 @@ fn latex_generate_fancy_cross_table(
     text.push_str("\\end{longtable}");
 
     text
-}
-
-// Check and print if there are any permutations that are not an automorphism for any latin square.
-// Check and print if there are any latin squares that only has the identity as an automorphism.
-fn try_automorphism_groups_porperties(
-    automorphisms_given_group: Vec<Vec<usize>>,
-    squares: Vec<LatinSquare>,
-    perms: Vec<Permutation>,
-) {
-    let mut j: usize = 0;
-
-    'i: for (i, p) in perms.iter().enumerate() {
-        for row in &automorphisms_given_group {
-            if row.binary_search(&i).is_ok() {
-                continue 'i;
-            }
-        }
-
-        j += 1;
-
-        println!("Permutation number {i}, {:?} is no automorphism.", p);
-
-        if j == 10 {
-            println!("Too many permutations, stopped.");
-            break;
-        }
-    }
-
-    let mut j: usize = 0;
-
-    for (i, row) in automorphisms_given_group.iter().enumerate() {
-        if row == &vec![0] {
-            println!("Square number {i}: ");
-            squares[i].print();
-            println!("Has only trivial automorphisms.");
-
-            j += 1;
-
-            if j == 10 {
-                println!("Too many squares, stopped.");
-                break;
-            }
-        }
-    }
 }
 
 // Takes a vec of latin squares, and a vec of permutations and creates the sparse bool table
@@ -376,7 +336,7 @@ fn calculate_fingerprint(classification: &LatinSquareClassification) -> usize {
     fingerprint
 }
 
-fn print_affine_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) {
+pub fn print_affine_automorphism_table(squares: &[LatinSquare], perms: &[Permutation]) {
     let mut result: Vec<LatinSquareClassification> = vec![];
 
     for (j, s) in squares.iter().enumerate() {

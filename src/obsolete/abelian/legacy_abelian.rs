@@ -2,6 +2,7 @@
 // Becase there was no benefit to storing as rows of lower triangular that could outweigh the benefit
 // of easily reusing the same code for sudocurity tables.
 
+// Assumes that one is working with an abelian group.
 // Generates every triplet that has to be associative.
 // (a, b, c) where a <= b <= c, but a != b != c
 pub fn generate_all_associativity_triplets(n: usize, zero_identity: bool) -> Vec<[usize; 3]> {
@@ -112,6 +113,7 @@ fn group_generation_recursion(table: &Vec<Vec<usize>>, n: usize) -> Vec<Vec<Vec<
     result
 }
 
+// Obsolete, superseded by the *_new variant.
 pub fn generate_all_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     let mut work: Vec<Vec<Vec<usize>>> = vec![];
 
@@ -123,6 +125,7 @@ pub fn generate_all_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     work
 }
 
+// Obsolete, superseded by the *_new variant.
 pub fn generate_all_sudocurity_groups(n: usize) -> Vec<Vec<Vec<usize>>> {
     let mut work: Vec<Vec<Vec<usize>>> = vec![];
 

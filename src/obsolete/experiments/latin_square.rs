@@ -7,7 +7,7 @@ use crate::structs::LatinStructure;
 use crate::structs::Permutation;
 
 // Checks if the class is exactly preserved under conjugacy.
-fn try_class_preserved_after_conjugacy(n: usize) {
+pub fn try_class_preserved_after_conjugacy(n: usize) {
     let squares = LatinSquare::generate_all(n);
 
     let mut classifications: (
