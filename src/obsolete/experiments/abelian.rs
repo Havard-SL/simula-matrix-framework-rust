@@ -5,6 +5,7 @@ use super::super::abelian::*;
 use crate::common::factorial;
 use crate::structs::permutation::generate_all_permutations;
 
+// Takes a map that generates latin squares and times it for i = 1, ... n.
 pub fn speedtest_group_generation(
     f: &dyn Fn(usize) -> Vec<Vec<Vec<usize>>>,
     n: usize,
@@ -24,6 +25,7 @@ pub fn speedtest_group_generation(
     (timings, sizes)
 }
 
+// Tests what permutations are automorphisms for some group.
 pub fn try_permutation_gives_automorphism(n: usize) {
     let length = factorial(n - 1);
 
@@ -70,6 +72,8 @@ pub fn try_permutation_gives_automorphism(n: usize) {
     );
 }
 
+// WARNING: This seems to be improperly coded, see comment in function.
+// Tests what permutation appears as a row in an abelian group of size n.
 pub fn try_permutation_is_group_op(n: usize) {
     let length = factorial(n - 1);
 
@@ -86,6 +90,11 @@ pub fn try_permutation_is_group_op(n: usize) {
     'perm: for p in &permutations {
         bar.inc(1);
         for g in &groups {
+            // WARNING: This doesn't make sense since the g is in upper triangular format.
+            // Needs a rewrite in order to function properly.
+            // Maybe it works after all, since the first row is the only one that is checked,
+            // and if every possible row is represented as the first row for some abelian group
+            // then the code would work after all.
             if g.contains(p) {
                 working_permutations.push(p.clone());
                 continue 'perm;
@@ -109,6 +118,7 @@ pub fn try_permutation_is_group_op(n: usize) {
     );
 }
 
+// Tests for every group if there is some non-identity permutation that is an automorphism.
 pub fn try_exist_perm_for_every_group_gives_automorphism(n: usize) {
     let groups = generate_all_sudocurity_groups_new(n);
 
@@ -150,7 +160,7 @@ pub fn try_exist_perm_for_every_group_gives_automorphism(n: usize) {
     );
 }
 
-pub fn compose_affine_permutation(
+fn compose_affine_permutation(
     permutation: &[usize],
     table: &[Vec<usize>],
     row: &usize,
@@ -166,6 +176,7 @@ pub fn compose_affine_permutation(
     perm
 }
 
+// Tests if every permutation is an affine automorphism for some abelian group.
 pub fn try_permutation_affine_automorphism(n: usize) {
     let length = factorial(n);
 
@@ -212,6 +223,8 @@ pub fn try_permutation_affine_automorphism(n: usize) {
     );
 }
 
+// Not sure what is tested here. Something with for every abelian group
+// finding every permutation that is an automorphism. And then printing it.
 pub fn try_permutations_equal_in_isomorphism_class(n: usize) {
     let length = factorial(n - 1);
 
