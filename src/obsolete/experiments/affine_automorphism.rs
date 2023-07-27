@@ -1,6 +1,9 @@
+use crate::structs::LatinSquare;
+use crate::structs::Permutation;
+
 // Check and print if there are any permutations that are not an automorphism for any latin square.
 // Check and print if there are any latin squares that only has the identity as an automorphism.
-fn try_automorphism_groups_porperties(
+pub fn try_automorphism_groups_porperties(
     automorphisms_given_group: Vec<Vec<usize>>,
     squares: Vec<LatinSquare>,
     perms: Vec<Permutation>,

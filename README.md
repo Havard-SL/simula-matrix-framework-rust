@@ -33,4 +33,4 @@ Any new traits is found in the "structs::traits" module. Any implementation corr
 
 The "obsolete" module contains all the code that was used by the abelian group generating and manipulating code as well as old code used for the ASCII tables of latin squares.
 
-Experiments that have been run can be seen under "obsolete/experiments". In order to run experiments, type "obsolete::experiments::{abelian, latin_square}::{name of experiment}" in the main function.
+Certain experiments that have been run can be seen under "obsolete/experiments". In order to run experiments, type "obsolete::experiments::{abelian, affine_automorphism, latin_square}::{name of experiment}" in the main function.
