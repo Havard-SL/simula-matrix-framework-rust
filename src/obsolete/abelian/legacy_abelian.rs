@@ -2,7 +2,8 @@
 // Becase there was no benefit to storing as rows of lower triangular that could outweigh the benefit
 // of easily reusing the same code for sudocurity tables.
 
-// Assumes that one is working with an abelian group.
+// NOT PROVEN THAT THIS IS ENOUGH TO CHECK FOR ASSOCIATIVITY! But experimentally it seems to be enough.
+// Assumes that one is working with a commutative quasigroup/loop.
 // Generates every triplet that has to be associative.
 // (a, b, c) where a <= b <= c, but a != b != c
 pub fn generate_all_associativity_triplets(n: usize, zero_identity: bool) -> Vec<[usize; 3]> {

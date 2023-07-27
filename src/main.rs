@@ -102,18 +102,24 @@ fn main() {
     // Generate every abelian group of order 6.
     // let every_abelian_group = obsolete::abelian::generate_all_groups_new(6);
 
-    // // Create an (old, non struct) permutation that flips 4 and 5.
+    // Print the amount of abalein groups generated above.
+    // println!("{}", every_abelian_group.len());
+
+    // Create an (old, non struct) permutation that flips 4 and 5.
     // let flipping_permutation = vec![0, 1, 2, 3, 5, 4];
 
-    // // Create the conjugate/conjugacy of a the 23rd abelian group with respect to flipping_permutation.
+    // Create the conjugate/conjugacy of a the 23rd abelian group with respect to flipping_permutation.
     // let conjugate = obsolete::abelian::apply_permutation_to_group(&every_abelian_group[22], &flipping_permutation);
 
-    // // Print the group operation table of conjugate in ASCII format.
+    // Print the group operation table of conjugate in ASCII format.
     // obsolete::abelian::print_pretty_table(&conjugate);
 
-    // // Generate every abelian group with fixed identity 0 of order 9.
+    // Generate every abelian group with fixed identity 0 of order 9.
     // let every_fixed_identity_abelian_group = obsolete::abelian::generate_all_sudocurity_groups_new(9);
 
-    // // Generate every permutation with fixed identity of order 9.
+    // Print the amount of abelian groups with fixed identity generated above.
+    // println!("{}", every_fixed_identity_abelian_group.len());
+
+    // Generate every permutation with fixed identity of order 9.
     // let every_fixed_0_permutation = obsolete::abelian::generate_sudocurity_permutations(9);
 }
