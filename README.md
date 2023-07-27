@@ -27,7 +27,7 @@ The various pdfs that can be found is the latex compiled tables. The 5 x 5 table
 
 All the structs are inside the "structs" module.
 
-Any implementation that is not part of a new trait lies with its corresponding struct.
+Any implementation that is not part of a new trait lies with its corresponding struct, as well as some functions that heavily depend on those structs.
 
 Any new traits is found in the "structs::traits" module. Any implementation corresponding to these traits are found with their respective trait definitions.
 
