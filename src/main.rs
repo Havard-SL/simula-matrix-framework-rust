@@ -77,7 +77,6 @@ fn create_ascii_table(n: usize) {
 
 // TODO: Methods vs standalone functions.
 fn main() {
-
     // Create the summary spreadsheet for 5x5 latin squares.
     // create_summary_spreadsheet(5);
 
@@ -88,7 +87,7 @@ fn main() {
     // create_latex_table(4);
 
     // Creates the ASCII table for 3x3 latin squares.
-    // create_ascii_table(3);
+    // create_ascii_table(4);
 
     // #############################
 
